@@ -27,3 +27,38 @@ replicate' :: (Num i, Ord i) => i -> a -> [a]
 replicate' i a 
   | i <= 0 = []
   | otherwise = a:replicate' (i-1) a
+
+
+take' :: (Num i, Ord i) => i -> [a] -> [a]
+take' i _         -- if i <= 0
+  | i <= 0 = []
+take' _ [] = []   -- if list is empty
+take' i (x:xs) = x:take' (i-1) xs
+
+elem' :: (Eq a) => a -> [a] -> Bool
+elem' _ [] = False
+elem' a (x:xs)
+  | a == x = True
+  | otherwise = a `elem'` xs
+
+-- quicksort :: (Ord a) => [a] -> [a]
+-- quicksort [] = []
+-- quicksort (x:xs)
+--   | x < head xs = quicksort xs
+--   | otherwise = head xs: quicksort (x: tail xs)
+
+-- Quicksort. an element that you compare against is calld a pivot.
+quicksort :: (Ord a) => [a] -> [a]
+quicksort [] = []
+quicksort (x:xs) = 
+  let smallerSorted = quicksort [a | a <- xs, a <= x]
+      biggerSorted = quicksort [a | a <- xs, a > x]
+  in smallerSorted ++ [x] ++ biggerSorted
+
+{-
+Often the edge case value turns out to be an identity. 
+The identity for multiplication is 1 because if you multiply something by 1, you get that something back. 
+Also when doing sums of lists, we define the sum of an empty list as 0 and 0 is the identity for addition.
+In quicksort, the edge case is the empty list and the identity is also the empty list, 
+because if you add an empty list to a list, you just get the original list back.
+-}
