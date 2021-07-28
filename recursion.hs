@@ -47,7 +47,7 @@ elem' a (x:xs)
 --   | x < head xs = quicksort xs
 --   | otherwise = head xs: quicksort (x: tail xs)
 
--- Quicksort. an element that you compare against is calld a pivot.
+-- Quicksort. an element that you compare against is called a pivot.
 quicksort :: (Ord a) => [a] -> [a]
 quicksort [] = []
 quicksort (x:xs) = 
@@ -55,6 +55,13 @@ quicksort (x:xs) =
       biggerSorted = quicksort [a | a <- xs, a > x]
   in smallerSorted ++ [x] ++ biggerSorted
 
+-- Using filter instead of `list comprehension`
+quicksort' :: (Ord a) => [a] -> [a]
+quicksort' [] = []
+quicksort' (x:xs) = 
+  let smallerSorted = quicksort' (filter (<=x) xs)
+      biggerSorted = quicksort' (filter (>x) xs)
+  in smallerSorted ++ [x] ++ biggerSorted
 {-
 Often the edge case value turns out to be an identity. 
 The identity for multiplication is 1 because if you multiply something by 1, you get that something back. 
