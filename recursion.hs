@@ -69,3 +69,4 @@ Also when doing sums of lists, we define the sum of an empty list as 0 and 0 is 
 In quicksort, the edge case is the empty list and the identity is also the empty list, 
 because if you add an empty list to a list, you just get the original list back.
 -}
+

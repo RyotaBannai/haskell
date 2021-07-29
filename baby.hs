@@ -23,8 +23,9 @@ and then you apply transformations to those solutions and filter them until you 
 -}
 triangles = [(a,b,c) |c <- [1..10], b <- [1..10], a <- [1..10], a^2 + b^2 == c^2, a + b + c == 24]
 
+-- https://hackage.haskell.org/package/flow-1.0.22/docs/Flow.html
 triangles' = 
-  let sameLen (a,b,c) = (a^2 + b^2 == c^2)
+  let sameLen (a,b,c) = a^2 + b^2 == c^2
       totalEq (a,b,c) = a + b + c == 24
       f = filter sameLen .> filter totalEq
   in f [(a,b,c) |c <- [1..10], b <- [1..10], a <- [1..10]]
