@@ -1,3 +1,5 @@
+module SyntaxInFunction where
+
 -- Pattern match (pattern matching on function parameters)
 -- Pattern matching in function definitions is syntactic sugar for case expressions
 -- When defining multiple line in ghci, wrap functions lke this :{ [ function definition comes here. ]:}
@@ -13,7 +15,7 @@ sayMe _ = "Not between 1 and 3" -- catch-all pattern must comes last. Order matt
 
 -- Recursion
 factorial :: (Integral a) => a -> a
-factorial 0 = 1 
+factorial 0 = 1
 factorial x = x * factorial (x - 1)
 
 -- Destructing.
@@ -21,19 +23,18 @@ addVectors :: (Num a) => (a, a) -> (a, a) -> (a, a) -- accepts two tuples.
 addVectors (f1, s1) (f2, s2) = (f1 + f2, s1 + s2)
 
 first :: (a, b, c) -> a
-first (a, _, _) = a 
+first (a, _, _) = a
 
-head' :: [a] -> a 
+head' :: [a] -> a
 head' [] = error "Can't call had on an empty list, dummy!" -- error function takes string and generates runtime error
-head' (x:_) = x
+head' (x : _) = x
 
 -- length of list.
 length' :: (Num b) => [a] -> b
 length' [] = 0
-length' (_:b) = length' b + 1
+length' (_ : b) = length' b + 1
 
-
--- Guards 
+-- Guards
 {-
 If all the guards of a function evaluate to False (and we haven't provided an otherwise catch-all guard), evaluation falls through to the next pattern. That's how patterns and guards play nicely together.
 -}
@@ -43,42 +44,46 @@ bmiTell w h
   | bmi <= normal = "You're supposedly normal. Pfft, I bet you're ugly!"
   | bmi <= fat = "You're fat! Lose some weight, fatty!"
   | otherwise = "You're a whale, congratulations!"
-  where bmi = w / h ^ 2
-        (skinny, normal, fat)  = (18.5, 25.0, 30.0) 
-        
+  where
+    bmi = w / h ^ 2
+    (skinny, normal, fat) = (18.5, 25.0, 30.0)
+
 -- Replaced to Where bindings--
 calcBmi :: (RealFloat a) => a -> a -> a
 calcBmi weight height = weight / height ^ 2
+
 -- bmiTell 85 1.90
 
 calcBmis :: (RealFloat a) => [(a, a)] -> [a]
 calcBmis xs = [bmi w h | (w, h) <- xs]
-  where bmi weight height = weight / height ^ 2
+  where
+    bmi weight height = weight / height ^ 2
 
 calcBmis' :: (RealFloat a) => [(a, a)] -> [a]
 calcBmis' xs = [bmi | (w, h) <- xs, let bmi = w / h ^ 2, bmi >= 25.0]
-{- 
-calcBmis' [(85, 1.90), (85, 1.90), (85, 1.843)] 
+
+{-
+calcBmis' [(85, 1.90), (85, 1.90), (85, 1.843)]
 -}
 
 initials :: String -> String -> String
 initials firstname lastname = [f] ++ ". " ++ [l] ++ "."
-  where (f:_) = firstname
-        (l:_) = lastname
-        
+  where
+    (f : _) = firstname
+    (l : _) = lastname
+
 initials' :: String -> String -> String
-initials' (f:_) (l:_) = [f] ++ ". " ++ [l] ++ "."
+initials' (f : _) (l : _) = [f] ++ ". " ++ [l] ++ "."
 initials' _ _ = "Please supply two Strings."
 
 {-
 Not only can we call functions as infix with backticks, we can also define them using backticks. Sometimes it's easier to read that way.
 -}
 myCompare :: (Ord a) => a -> a -> Ordering
-a `myCompare` b 
+a `myCompare` b
   | a > b = GT
   | a == b = EQ
   | otherwise = LT
-
 
 -- Let Bindings
 -- r: radius h: height
@@ -86,7 +91,7 @@ cylinder :: (RealFloat a) => a -> a -> a
 cylinder r h =
   let sideArea = 2 * pi * r * h
       topArea = pi * r ^ 2
-  in sideArea + 2 * topArea
+   in sideArea + 2 * topArea
 
 {-
 [let square x = x * x in (square 5, square 3, square 2)]
@@ -99,14 +104,16 @@ Whereas pattern matching on function parameters can only be done when defining f
 -}
 
 describeList :: [a] -> String
-describeList xs = "The list is " ++ case xs of [] -> "empty."
-                                               [_] -> "a singleton list."
-                                               _ -> "a longer list."
-
+describeList xs =
+  "The list is " ++ case xs of
+    [] -> "empty."
+    [_] -> "a singleton list."
+    _ -> "a longer list."
 
 describeList' :: [a] -> String
 describeList' xs = "The list is " ++ what xs
-  -- Below is pattern matching in function definition.
-  where what [] = "empty."
-        what [_] = "a singleton list."
-        what _ = "a longer list."
+  where
+    -- Below is pattern matching in function definition.
+    what [] = "empty."
+    what [_] = "a singleton list."
+    what _ = "a longer list."
