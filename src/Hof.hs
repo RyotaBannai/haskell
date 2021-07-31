@@ -167,7 +167,32 @@ However, if you take an infinite list at a point and you try to fold it up from 
 sqrtSums :: Int
 sqrtSums = length (takeWhile (< 1000) (scanl1 (+) (map sqrt [1 ..]))) + 1
 
+-- with Function application & Function composition
+-- add $ at the end to apply inputs
+sqrtSums' :: Int
+sqrtSums' = (+) 1 . length . takeWhile (< 1000) . scanl1 (+) . map sqrt $ [1 ..]
+
+-- More readable?
+sqrtSums'' :: Int
+sqrtSums'' =
+  let takeWhileUnder1000 = takeWhile (< 1000) accumAllWithAddition
+      accumAllWithAddition = scanl1 (+) squeresAll
+      squeresAll = map sqrt [1 ..]
+   in (+) 1 $ length takeWhileUnder1000
+
 {-
 We use takeWhile here instead of filter because filter doesn't work on infinite lists.
 Even though we know the list is ascending, filter doesn't, so we use takeWhile to cut the scanlist off at the first occurence of a sum greater than 1000.
 -}
+
+-- Function application with &
+resultOfAppliedEachFunction :: [Double]
+resultOfAppliedEachFunction = map ($ 3) [(4 +), (10 *), (^ 2), sqrt]
+
+-- Function composition
+negateAll :: [Integer]
+negateAll = map (\x -> negate (abs x)) [5, 2, -2, 3, -1, -5]
+
+-- Function composition is right associative
+negateAll' :: [Integer]
+negateAll' = map (negate . abs) [5, 2, -2, 3, -1, -5]
