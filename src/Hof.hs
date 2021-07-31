@@ -126,3 +126,48 @@ are equivalent since both (+3) and (\x -> x + 3) are functions that take a numbe
 listOfFuns = map (*) [0 ..]
 
 result = (listOfFuns !! 1) 5 -- `!!` means indexing list
+
+-- These are equivalent.
+addThree :: (Num a) => a -> a -> a -> a
+addThree a b c = a + b + c
+
+addThree' :: (Num a) => a -> a -> a -> a
+addThree' = \a -> \b -> \c -> a + b + c
+
+addThree'' :: (Num a) => a -> a -> a -> a
+addThree'' = \a b c -> a + b + c
+
+-- Fold
+sum' :: (Num a) => [a] -> a
+sum' xs = foldl (\acc x -> acc + x) 0 xs
+
+{-
+some improvements:
+sum' = foldl (\acc x -> acc + x) 0
+sum' = foldl (+) 0
+sum' = foldl (+) 0
+sum' = sum
+-}
+
+-- check if ys contains y or not.
+elem' :: (Eq a) => a -> [a] -> Bool
+elem' y ys = foldl (\acc x -> if x == y then True else acc) False ys
+
+{-
+One big difference is that:
+right folds work on infinite lists, whereas left ones don't!
+To put it plainly, if you take an infinite list at some point and you fold it up from the right,
+you'll eventually reach the beginning of the list.
+However, if you take an infinite list at a point and you try to fold it up from the left, you'll never reach an end!
+
+-- https://stackoverflow.com/questions/3082324/foldl-versus-foldr-behavior-with-infinite-lists
+-}
+
+-- scan generates list of accumulated compuated result.
+sqrtSums :: Int
+sqrtSums = length (takeWhile (< 1000) (scanl1 (+) (map sqrt [1 ..]))) + 1
+
+{-
+We use takeWhile here instead of filter because filter doesn't work on infinite lists.
+Even though we know the list is ascending, filter doesn't, so we use takeWhile to cut the scanlist off at the first occurence of a sum greater than 1000.
+-}
