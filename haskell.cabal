@@ -27,6 +27,7 @@ library
     exposed-modules:
         Hof
         Baby
+        Modules
         Recursion
         SyntaxInFunction
         TypesAndTypeclasses
