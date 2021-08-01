@@ -15,11 +15,19 @@ module DataTypeAndTypeclasses
     Code,
     lockerLookup,
     lockers,
+    List' (..),
+    List'' (..),
+    (.++),
+    Tree (..),
+    singletonTree,
+    treeInsert,
+    treeElem,
   )
 where
 
 import qualified Data.Map
 import qualified Data.Map as Map
+import Data.Sequence (Seq (Empty), singleton)
 
 -- export all Type contructors wiht `..`
 -- We could also opt not to export any value constructors for Shape by just writing Shape in the export statement.
@@ -106,3 +114,73 @@ lockers =
       (109, (Taken, "893JJ")),
       (110, (Taken, "99292"))
     ]
+
+-- Resursive data structures
+-- Cons' `:` constructor is right associative.
+data List' a = Empty' | Cons' a (List' a) deriving (Show, Read, Eq, Ord)
+
+-- data List' a = Empty | Cons' {listHead :: a, listTail :: List a} deriving (Show, Read, Eq, Ord)
+
+-- Fixity declaration
+infixr 5 :-:
+
+data List'' a = Empty'' | a :-: (List'' a) deriving (Show, Read, Eq, Ord)
+
+{-
+3 :-: 4 :-: Empty''
+-}
+
+-- Stealing List ++ definition.
+infixr 5 .++
+
+(.++) :: List'' a -> List'' a -> List'' a
+Empty'' .++ ys = ys
+(x :-: xs) .++ ys = x :-: (xs .++ ys) -- we can match here because we define like this in data constructor above
+
+{-
+a = (100 :-: Empty'')
+b = (3 :-: 4 :-: 5 :-: Empty'')
+a .++ b -- 100 :-: (3 :-: (4 :-: (5 :-: Empty'')))
+-}
+
+-- Implement Binary Tree(not balanced binary tree)
+data Tree a = EmptyTree | Node a (Tree a) (Tree a) deriving (Show, Read, Eq)
+
+-- singleton tree (a tree with just one node)
+singletonTree :: a -> Tree a
+singletonTree x = Node x EmptyTree EmptyTree
+
+treeInsert :: (Ord a) => a -> Tree a -> Tree a
+treeInsert x EmptyTree = singletonTree x
+treeInsert x (Node a left right)
+  | x == a = Node x left right -- If the same value Node exists, then return the same Tree
+  | x < a = Node a (treeInsert x left) right
+  | x > a = Node a left (treeInsert x right)
+
+{-
+foldr treeInsert EmptyTree [5,4,2,6,6,6,3,7,9,1,3]
+treeInsert 3 $ treeInsert 4 $ treeInsert 10 $ treeInsert 6 $ treeInsert 5 EmptyTree
+
+Node 5
+(Node 4
+  (Node 3
+    EmptyTree
+    EmptyTree)
+  EmptyTree) -- i.g. 4.5
+(Node 6
+  EmptyTree -- i.g. 5.5
+  (Node 10
+    EmptyTree
+    EmptyTree))
+-}
+
+treeElem :: (Ord a) => a -> Tree a -> Bool
+treeElem x EmptyTree = False
+treeElem x (Node a left right)
+  | x == a = True
+  | x < a = treeElem x left
+  | x > a = treeElem x right
+
+{-
+treeElem 6 myTree -- True
+-}
