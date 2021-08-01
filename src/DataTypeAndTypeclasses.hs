@@ -23,6 +23,9 @@ module DataTypeAndTypeclasses
     treeInsert,
     treeElem,
     TrafficLight (..),
+    YesNoJS,
+    yesno,
+    yesnoIf,
   )
 where
 
@@ -203,4 +206,50 @@ instance Show TrafficLight where
 {-
 Red `elem` [Red, Yellow, Green] -- True
 [Red, Yellow, Green] -- [Red light,Yellow light,Green light]
+-}
+
+-- Javascript-ish bool inference
+class YesNoJS a where
+  yesno :: a -> Bool
+
+instance YesNoJS Int where
+  yesno 0 = False
+  yesno _ = True
+
+instance YesNoJS Integer where
+  yesno 0 = False
+  yesno _ = True
+
+instance YesNoJS Float where
+  yesno 0.0 = False
+  yesno _ = True
+
+instance YesNoJS Double where
+  yesno 0.0 = False
+  yesno _ = True
+
+instance YesNoJS [a] where
+  yesno [] = False
+  yesno _ = True
+
+instance YesNoJS Bool where
+  yesno = id -- identity function: takes a paramter and return the same parameter without applying any operations.
+
+instance YesNoJS (Maybe a) where
+  yesno (Just _) = True
+  yesno Nothing = False
+
+instance YesNoJS (Tree a) where
+  yesno EmptyTree = False
+  yesno _ = True
+
+instance YesNoJS TrafficLight where
+  yesno Red = False
+  yesno _ = True
+
+yesnoIf :: YesNoJS a => a -> p -> p -> p
+yesnoIf yesnoVal yesnoResult noResult = if yesno yesnoVal then yesnoResult else noResult
+
+{-
+yesnoIf [] "YES" "NO" -- "NO"
 -}
