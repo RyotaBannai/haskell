@@ -9,8 +9,17 @@ module DataTypeAndTypeclasses
     vplus,
     vectMult,
     scalarMult,
+    IntMap,
+    LockerState (..),
+    LockerMap,
+    Code,
+    lockerLookup,
+    lockers,
   )
 where
+
+import qualified Data.Map
+import qualified Data.Map as Map
 
 -- export all Type contructors wiht `..`
 -- We could also opt not to export any value constructors for Shape by just writing Shape in the export statement.
@@ -60,3 +69,40 @@ vectMult :: (Num t) => Vector t -> t -> Vector t
 
 scalarMult :: (Num t) => Vector t -> Vector t -> Vector t
 (Vector i j k) `scalarMult` (Vector l m n) = Vector (i * l) (j * m) (k * n)
+
+-- Type synonyms
+-- Partially applied type
+
+type IntMap = Map.Map Int
+
+-- Locker example
+data LockerState = Taken | Free deriving (Show, Eq)
+
+type Code = String
+
+type LockerMap = Map.Map Int (LockerState, Code)
+
+-- Possible failure is either Takne or doesn't exist.
+{-
+case clause can be considered as Scala's pattern match:
+Scala: x match { ... }
+Haskell: case x of ...
+-}
+lockerLookup :: Int -> LockerMap -> Either String Code
+lockerLookup lockerNumber map = case Map.lookup lockerNumber map of
+  Nothing -> Left $ "Locker number " ++ show lockerNumber ++ " don't exist."
+  Just (state, code) ->
+    if state /= Taken
+      then Right code
+      else Left $ "Locker " ++ show lockerNumber ++ " is already taken."
+
+lockers :: LockerMap
+lockers =
+  Map.fromList
+    [ (100, (Taken, "ZD39I")),
+      (101, (Free, "JAH3I")),
+      (103, (Free, "IQSA9")),
+      (105, (Free, "QOTSA")),
+      (109, (Taken, "893JJ")),
+      (110, (Taken, "99292"))
+    ]

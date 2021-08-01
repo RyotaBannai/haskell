@@ -34,3 +34,8 @@
   - `Saturday > Friday -- True`
   - `succ Monday -- Tuesday`
   - `[Thursday .. Sunday], [minBound .. maxBound] :: [Day]`
+
+- Either: 
+  - `Either a b`:
+    - `a` is some sort of type that can tell us something about `the possible failure` 
+    - `b` is the type of `a successful computation`
