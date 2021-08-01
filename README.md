@@ -22,3 +22,15 @@
    - `value constructors`: he parts after the `=`.
    - `data Int = -2147483648 | -2147483647 | ... | -1 | 0 | 1 | 2 | ... | 2147483647`:
      - `The first and last value constructors are the minimum and maximum possible values of Int`. It's `not` actually defined like this, the ellipses are here because we omitted a heapload of numbers, so this is just for illustrative purposes.
+- `Do we benefit from type parameter in data declaration(meaming adding a typeclass constraint onto a parameter)?`:
+  - If we were defining a mapping type, we could add `a typeclass constraint` in the data declaration:
+  `data (Ord k) => Map k v = ...  `
+  - However, it's a very strong convention in Haskell to `never add typeclass constraints in data declarations`. Why? Well, because we don't benefit a lot, but we end up writing more class constraints, even when we don't need them. If we put or don't put the `Ord k constraint` in the data declaration for `Map k v`, we're going to have to put the constraint into functions that assume the keys in a map can be ordered. But if we don't put the constraint in the `data declaration`, we don't have to put `(Ord k) =>` in the `type declarations` of functions that don't care whether the keys can be ordered or not. An example of such a function is toList, that just takes a mapping and converts it to an `associative list`. Its type signature is `toList :: Map k a -> [(k, a)]`. If `Map k v` had a type constraint in its data declaration, the type for toList would have to be `toList :: (Ord k) => Map k a -> [(k, a)]`, even though the function doesn't do any comparing of keys by order.
+
+- We can `derive instances for the Ord type class`, which is for types that have values that can be ordered. If we compare two values of the same type that were made using different constructors, the value which was made with a constructor that's defined `first is considered smaller`. For instance, consider the `Bool` type, which can have a value of either `False` or `True`. Defining like `data Bool = False | True deriving (Ord)` makes `True` is bigger than `False`(`GT`)
+- `data Day = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday deriving (Eq, Ord, Show, Read, Bounded, Enum)`
+  - Because all the value constructors are `nullary` (`take no parameters, i.e. fields`), we can make it part of the `Enum` typeclass. The Enum typeclass is for `things that have predecessors and successors`. We can also make it part of the `Bounded` typeclass, which is for things that have `a lowest possible value and highest possible value`.
+  - `minBound :: Day  -- Monday`
+  - `Saturday > Friday -- True`
+  - `succ Monday -- Tuesday`
+  - `[Thursday .. Sunday], [minBound .. maxBound] :: [Day]`

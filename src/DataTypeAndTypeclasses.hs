@@ -1,4 +1,16 @@
-module DataTypeAndTypeclasses (Point (..), Shape (..), surface, nudge, baseCircle, baseRect) where
+module DataTypeAndTypeclasses
+  ( Point (..),
+    Shape (..),
+    surface,
+    nudge,
+    baseCircle,
+    baseRect,
+    Vector (..),
+    vplus,
+    vectMult,
+    scalarMult,
+  )
+where
 
 -- export all Type contructors wiht `..`
 -- We could also opt not to export any value constructors for Shape by just writing Shape in the export statement.
@@ -33,3 +45,18 @@ baseCircle = Circle (Point 0 0)
 
 baseRect :: Float -> Float -> Shape
 baseRect x y = Rectangle (Point 0 0) (Point x y)
+
+-- Type parameter `a` before "="
+data Vector a = Vector a a a deriving (Show)
+
+{-
+These functions can operate on types of Vector Int, Vector Integer, Vector Float, whatever, as long as the a from Vector a is from the Num typeclass.
+-}
+vplus :: (Num t) => Vector t -> Vector t -> Vector t
+(Vector i j k) `vplus` (Vector l m n) = Vector (i + l) (j + m) (k + n)
+
+vectMult :: (Num t) => Vector t -> t -> Vector t
+(Vector i j k) `vectMult` m = Vector (i * m) (i * j) (i * k)
+
+scalarMult :: (Num t) => Vector t -> Vector t -> Vector t
+(Vector i j k) `scalarMult` (Vector l m n) = Vector (i * l) (j * m) (k * n)

@@ -34,6 +34,7 @@ library
     Geometry.Sphere
     Hof
     Modules
+    Person
     Recursion
     SyntaxInFunction
     TypesAndTypeclasses
