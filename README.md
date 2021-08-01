@@ -43,3 +43,13 @@
 - `Fixity declaration`: When we define functions as `operators`, we can use that to give them a `fixity` (but we don't have to). A `fixity` states `how tightly the operator binds` and whether it's `left-associative` or `right-associative`. For instance, `*`'s fixity is `infixl 7` and `+`'s fixity is `infixl 6`. That means that they're both `left-associative` (4 * 3 * 2 is (4 * 3) * 2) but `* binds tighter than +`, `because it has a greater fixity`, so 5 * 4 + 3 is (5 * 4) + 3
   - When deriving `Show` for our type, Haskell will still display it as if the constructor was `a prefix function`, hence the parentheses around the operator (`remember, 4 + 3 is (+) 4 3`).
   - Normal prefix constructors or stuff like `8` or `'a'`, which are basically constructors for the `numeric` and `character` types, respectively.
+
+- `Typeclasses`:
+  - If we have say `class Eq a where` and then define a type declaration within that class like `(==) :: a -> -a -> Bool`, then when we examine the type of that function later on, it will have the type of `(Eq a) => a -> a -> Bool.`
+  - `the minimal complete definition` for the typeclass, means the minimum of functions that we have to implement so that our type can behave like the class advertises.
+    - We'd have to implement both of these functions(`==`, `\=` in `Eq`) when making a type an instance of it, because Haskell wouldn't know how these two functions are related. `The minimal complete definition` would then be: both `==` and `/=`.
+  - `subclassing typeclasses of other typeclasses`:
+    - The example of `Num` typeclass: `class (Eq a) => Num a where  ...`
+      - `a` has to be `Eq` before it becomes `Num` (`a` has to be a `concrete typ`e, meaning `type constructors` like `Maybe` can't be sit in the spot alone.)
+    - `instance (Eq m) => Eq (Maybe m) where ...`: 
+      - We say this: we want all types of the form `Maybe` m to be part of the `Eq` typeclass, but only those types where the `m` is also a part of `Eq`

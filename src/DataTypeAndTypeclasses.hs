@@ -22,6 +22,7 @@ module DataTypeAndTypeclasses
     singletonTree,
     treeInsert,
     treeElem,
+    TrafficLight (..),
   )
 where
 
@@ -183,4 +184,23 @@ treeElem x (Node a left right)
 
 {-
 treeElem 6 myTree -- True
+-}
+
+data TrafficLight = Red | Yellow | Green -- Notice we didn't derive any class instances for it, such as `Eq`! because we define it on our own.
+
+-- Using `instance` keyword
+instance Eq TrafficLight where
+  Red == Red = True
+  Yellow == Yellow = True
+  Green == Green = True
+  _ == _ = False
+
+instance Show TrafficLight where
+  show Red = "Red light"
+  show Yellow = "Yellow light"
+  show Green = "Green light"
+
+{-
+Red `elem` [Red, Yellow, Green] -- True
+[Red, Yellow, Green] -- [Red light,Yellow light,Green light]
 -}
