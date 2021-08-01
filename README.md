@@ -16,3 +16,9 @@
   - We can check for `subsets` or `proper subset`:
     - Set A is a `subset` of set B if B contains all the elements that A does. 
     - Set A is a `proper subset` of set B if B contains all the elements that A does but has more elements.
+- `Own Types and Typeclasses`:
+ - `data  Bool = False | True`:
+   - `data` means that we're defining a new data type.
+   - `value constructors`: he parts after the `=`.
+   - `data Int = -2147483648 | -2147483647 | ... | -1 | 0 | 1 | 2 | ... | 2147483647`:
+     - `The first and last value constructors are the minimum and maximum possible values of Int`. It's `not` actually defined like this, the ellipses are here because we omitted a heapload of numbers, so this is just for illustrative purposes.

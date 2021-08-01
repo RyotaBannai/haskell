@@ -4,7 +4,7 @@ module Geometry.Cube
   )
 where
 
-import Geometry.Cuboid
+import Geometry.Cuboid (cuboidArea)
 
 cubeVolume :: Float -> Float
 cubeVolume side = cuboidArea side side side

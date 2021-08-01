@@ -28,6 +28,7 @@ library
   -- cabal-fmt: expand src
   exposed-modules:
     Baby
+    DataTypeAndTypeclasses
     Geometry.Cube
     Geometry.Cuboid
     Geometry.Sphere
