@@ -31,7 +31,7 @@ where
 
 import qualified Data.Map
 import qualified Data.Map as Map
-import Data.Sequence (Seq (Empty), singleton)
+import Data.Sequence (Seq (Empty))
 
 -- export all Type contructors wiht `..`
 -- We could also opt not to export any value constructors for Shape by just writing Shape in the export statement.
@@ -241,7 +241,7 @@ instance YesNoJS (Maybe a) where
 
 instance YesNoJS (Tree a) where
   yesno EmptyTree = False
-  yesno _ = True
+  yesno _ = False
 
 instance YesNoJS TrafficLight where
   yesno Red = False
@@ -253,3 +253,39 @@ yesnoIf yesnoVal yesnoResult noResult = if yesno yesnoVal then yesnoResult else 
 {-
 yesnoIf [] "YES" "NO" -- "NO"
 -}
+
+{-
+Functor impl:
+class Functor f where
+  fmap :: (a -> b) -> f a -> f b
+
+map's type signature:
+map :: (a -> b) -> [a] -> [b].
+:=  In fact, `map` is just a `fmap` that works only on `lists`. Here's how the list is an instance of the Functor typeclass:
+
+instance Functor [] where
+  fmap = map
+
+Notice how we didn't write `instance Functor [a] where`, because from `fmap :: (a -> b) -> f a -> f b`, we see that the `f` has to be a type constructor that takes one type. `[a]` is already `a concrete type` (of a list with any type inside it), while `[]` is `a type constructor` that takes one type and can produce types such as `[Int]`, `[String]` or `even [[String]]`.
+-}
+
+{-
+Definition of Functor for Maybe:
+instance Functor Maybe where
+  fmap f (Just x) = Just (f x)
+  fmap f Nothing = Nothing
+-}
+-- fmap (++ " HEY GUYS IM INSIDE THE JUST") (Just "Something serious.") -- Just "Something serious. HEY GUYS IM INSIDE THE JUST"
+-- fmap (++ " HEY GUYS IM INSIDE THE JUST") Nothing -- Nothing
+
+instance Functor Tree where
+  fmap f EmptyTree = EmptyTree
+  fmap f (Node x leftsub rightsub) = Node (f x) (fmap f leftsub) (fmap f rightsub)
+
+{-
+fmap (*2) (foldr treeInsert EmptyTree [5,2,6,7,3,3,1]) -- Node 2 EmptyTree (Node 6 (Node 4 EmptyTree EmptyTree) (Node 14 (Node 12 (Node 10 EmptyTree EmptyTree) EmptyTree) EmptyTree))
+-}
+
+-- instance Functor (Either a) where
+--   fmap f (Right x) = Right (f x)
+--   fmap f (Left x) = Left x
