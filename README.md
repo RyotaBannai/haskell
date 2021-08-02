@@ -53,3 +53,8 @@
       - `a` has to be `Eq` before it becomes `Num` (`a` has to be a `concrete typ`e, meaning `type constructors` like `Maybe` can't be sit in the spot alone.)
     - `instance (Eq m) => Eq (Maybe m) where ...`: 
       - We say this: we want all types of the form `Maybe` m to be part of the `Eq` typeclass, but only those types where the `m` is also a part of `Eq`
+
+- `Kinds`:
+  - Types have their own little labels, called `kinds`. A kind is more or less the `type of a type`
+  - `*`(called star, or type): a concrete type. a type that doesn't take any type parameters and values can only have types that are concrete types.
+  - We used `:k` on a `type` to get its `kind`, just like we can use `:t` on a `value` to get its `type`. Like we said, `types` are the `labels of values` and `kinds` are the `labels of types` and there are `parallels between the two`.

@@ -26,12 +26,16 @@ module DataTypeAndTypeclasses
     YesNoJS,
     yesno,
     yesnoIf,
+    Tofu,
+    tofu,
+    Frank (..),
   )
 where
 
 import qualified Data.Map
 import qualified Data.Map as Map
 import Data.Sequence (Seq (Empty))
+import GHC.Base (join)
 
 -- export all Type contructors wiht `..`
 -- We could also opt not to export any value constructors for Shape by just writing Shape in the export statement.
@@ -289,3 +293,26 @@ fmap (*2) (foldr treeInsert EmptyTree [5,2,6,7,3,3,1]) -- Node 2 EmptyTree (Node
 -- instance Functor (Either a) where
 --   fmap f (Right x) = Right (f x)
 --   fmap f (Left x) = Left x
+
+class Tofu t where
+  tofu :: j a -> t a j
+
+-- decreases laziness
+newtype Frank a b = Frank {frankField :: b a} deriving (Show)
+
+-- :t Frank {frankField = Just "Haha"} -- Frank {frankField = Just "Haha"} :: Frank [Char] Maybe
+
+{-
+Functor impl:
+class Functor f where
+  fmap :: (a -> b) -> f a -> f b
+-}
+instance Tofu Frank where
+  tofu x = Frank x
+
+-- tofu (Just 'a') :: Frank Char Maybe -- Frank {frankField = Just 'a'}
+
+data Barry t k p = Barry {yabba :: p, dabba :: t k}
+
+instance Functor (Barry a b) where
+  fmap f Barry {yabba = x, dabba = y} = Barry {yabba = f x, dabba = y}
