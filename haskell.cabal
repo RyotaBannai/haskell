@@ -34,6 +34,7 @@ library
     Geometry.Sphere
     Hof
     Modules
+    MyIO
     Person
     Recursion
     SyntaxInFunction

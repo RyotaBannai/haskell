@@ -295,7 +295,7 @@ fmap (*2) (foldr treeInsert EmptyTree [5,2,6,7,3,3,1]) -- Node 2 EmptyTree (Node
 --   fmap f (Left x) = Left x
 
 class Tofu t where
-  tofu :: j a -> t a j
+  tofu :: j a -> t a j -- the type of a value tofu takes as tis parameter, `j a` has to have a kind of *, we assume * for `a` and so we can infer that `j` has to have a kind of `* -> *`
 
 -- decreases laziness
 newtype Frank a b = Frank {frankField :: b a} deriving (Show)
@@ -311,7 +311,6 @@ instance Tofu Frank where
   tofu x = Frank x
 
 -- tofu (Just 'a') :: Frank Char Maybe -- Frank {frankField = Just 'a'}
-
 data Barry t k p = Barry {yabba :: p, dabba :: t k}
 
 instance Functor (Barry a b) where
