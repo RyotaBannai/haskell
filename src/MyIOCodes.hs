@@ -1,0 +1,52 @@
+module MyIOCodes where
+
+import Data.Char
+import Control.Monad
+
+hw :: IO ()
+hw = putStrLn "hello world"
+
+hw' :: IO ()
+hw' = do
+  putStrLn "What's your first name?"
+  firstName <- getLine
+  putStrLn "What's your last name?"
+  lastName <- getLine
+  let bigFirstName = map toUpper firstName
+      bigLastName = map toUpper lastName
+  putStrLn $ "hey " ++ bigFirstName ++ " " ++ bigLastName ++ ", how are you?"
+
+in' = do 
+  line <- getLine
+  if null line 
+    then return () -- this is a `I/O action` -- return is a box as well. you can wrap String like return "haha", which is `IO String` type
+    else do 
+      putStrLn $ reverseWords line 
+      in'
+
+reverseWords :: String -> String
+reverseWords = unwords . map reverse . words 
+
+-- `return` is sort of `the opposite to <-`. 
+-- While `return` takes a value and wraps it up in a box, 
+-- `<-` takes a box (and performs it) and takes the value out of it, binding it to a name. 
+re = do 
+  a <- return "hehe" -- replace with `let a = "hehe"`
+  b <- return "yeah!"
+  putStrLn $ a ++ " " ++ b
+
+-- read Char one by one
+gc = do
+  c <- getChar 
+  if c /= ' '
+    then do
+      putChar c 
+      gc
+    else return ()
+
+-- improved
+gc' = do 
+  c <- getChar 
+  when (c /= ' ') $ do
+    putChar c 
+    gc'
