@@ -57,4 +57,3 @@ form = do
     getLine)
   putStrLn "The colors that you associate with 1, 2, 3, and 4 are: "
   mapM putStrLn colors
-  
