@@ -60,5 +60,7 @@
   - We used `:k` on a `type` to get its `kind`, just like we can use `:t` on a `value` to get its `type`. Like we said, `types` are the `labels of values` and `kinds` are the `labels of types` and there are `parallels between the two`.
 - Haskell's mechanism for poralizing `side-effects` and `function purity`:
   - Haskell actually has a really clever system for dealing with functions that have `side-effects` that `neatly separates the part of our program that is pure and the part of our program that is impure`, which does all the dirty work like talking to `the keyboard` and `the screen`. With those two parts separated, we can still reason about our pure program and take advantage of all the things that `purity` offers, like `laziness`, `robustness` and `modularity` `while efficiently communicating with the outside world`.
-- `()`: `empty tuple` known as `unit`:
-  - `:t putStrLn`: `putStrLn :: Strin -> IO ()`
+  - `()`: `empty tuple` known as `unit`:
+    - `:t putStrLn`: `putStrLn :: Strin -> IO ()`
+  - `Don't think` of a function like `putStrLn` as a function that `takes a string and prints it to the screen`:
+    - Think of it as a function that `takes a string and returns an I/O action`. That I/O action will, when performed, print beautiful poetry to your terminal.
