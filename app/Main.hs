@@ -3,11 +3,35 @@ module Main where
 import qualified Baby
 import Control.Monad
 import Data.Char
+import Data.List
+import System.Directory
 import System.IO
 
 -- main always has a type signate of main :: IO something
 main :: IO ()
-main = blockBuffering
+main = todoList
+
+todoFilePath :: [Char]
+todoFilePath = "resources/todo.txt"
+
+todoList :: IO ()
+todoList = do
+  handle <- openFile todoFilePath ReadMode
+  (tempName, tempHandle) <- openTempFile "." "temp" -- create temp file at current dir
+  contents <- hGetContents handle
+  let todoTasks = lines contents
+      numberedTasks = zipWith (\n line -> show n ++ " - " ++ line) [0 ..] todoTasks
+  putStrLn "These are your TO-DO items:"
+  putStr $ unlines numberedTasks
+  putStrLn "Which one do you want to delete?"
+  numberString <- getLine
+  let number = read numberString -- bind "1" to 1
+      newTodoItems = delete (todoTasks !! number) todoTasks -- delete := deletes first occurance in list
+  hPutStr tempHandle $ unlines newTodoItems
+  hClose handle
+  hClose tempHandle
+  removeFile todoFilePath -- takes a filePath not handle.
+  renameFile tempName todoFilePath
 
 blockBuffering :: IO ()
 blockBuffering = do
