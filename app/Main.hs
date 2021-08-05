@@ -7,15 +7,26 @@ import System.IO
 
 -- main always has a type signate of main :: IO something
 main :: IO ()
-main = readfwf
+main = blockBuffering
+
+blockBuffering :: IO ()
+blockBuffering = do
+  withFile
+    "some_bianry.txt"
+    ReadMode
+    ( \handle -> do
+        hSetBuffering handle $ BlockBuffering (Just 2048) -- doen't read line by line but reads the whole file in chuncks of 2048 bytes.
+        contents <- hGetContents handle
+        putStr contents
+    )
 
 readfwf :: IO ()
 readfwf = do
   withFile
     "resources/girlfriends.txt"
     ReadMode
+    -- withFile's lambda takes a `handle` and return a I/O action
     ( \handle -> do
-        -- withFile's lambda takes a `handle` and return a I/O action
         contents <- hGetContents handle
         putStr contents
     )
