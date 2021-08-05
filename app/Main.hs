@@ -5,17 +5,60 @@ import Control.Monad
 import Data.Char
 import Data.List
 import System.Directory
+import System.Environment
 import System.IO
 
 -- main always has a type signate of main :: IO something
 main :: IO ()
-main = todoList
+main = gate
 
-todoFilePath :: [Char]
-todoFilePath = "resources/todo.txt"
+{-
+:run with arguments
+`cabal run --help`
+$ cabal run haskell -O2 remove "resources/todo.txt" 1
+-}
 
-todoList :: IO ()
-todoList = do
+gate :: IO ()
+gate = do
+  (command : args) <- getArgs
+  let (Just action) = lookup command dispatch
+  action args
+
+dispatch :: [(String, [String] -> IO ())]
+dispatch = [("add", addTodo), ("view", view), ("remove", deleteTodo)]
+
+view :: [String] -> IO ()
+view [todoFilePath] = do
+  contents <- readFile todoFilePath
+  let todoTasks = lines contents
+      numberedTasks = zipWith (\n line -> show n ++ " - " ++ line) [0 ..] todoTasks
+  putStrLn "These are your TO-DO items:"
+  putStr $ unlines numberedTasks
+view _ = return ()
+
+addTodo :: [String] -> IO ()
+addTodo [todoFilePath, todo] = appendFile todoFilePath (todo ++ "\n")
+addTodo _ = return ()
+
+deleteTodo :: [String] -> IO ()
+deleteTodo [todoFilePath, numberString] = do
+  handle <- openFile todoFilePath ReadMode
+  (tempName, tempHandle) <- openTempFile "." "temp"
+  contents <- hGetContents handle
+  let number = read numberString
+      todoTasks = lines contents
+      newTodoItems = delete (todoTasks !! number) todoTasks
+  hPutStr tempHandle $ unlines newTodoItems
+  hClose handle
+  hClose tempHandle
+  removeFile todoFilePath
+  renameFile tempName todoFilePath
+deleteTodo _ = return ()
+
+-- todoFilePath :: [Char]
+-- todoFilePath = "resources/todo.txt"
+deleteTodo' :: String -> IO ()
+deleteTodo' todoFilePath = do
   handle <- openFile todoFilePath ReadMode
   (tempName, tempHandle) <- openTempFile "." "temp" -- create temp file at current dir
   contents <- hGetContents handle
