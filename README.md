@@ -80,4 +80,13 @@
     - `reads "(1,2)    (3,4)" :: [((Int, Int), String)] -- [((1,2),"    (3,4)")]`
   - `reads` returns empty list when doesn't match:
     - `null $ (reads "aa" :: [(Int, String)]) -- True`
+- `ByteString`:
+  - ByteStrings are sort of like lists, only each element is one byte(or 8 bits) in size. The way they handle laziness i also different.
+    - strict: completely do away with laziness. you can't have things like infinite list(because they're read into memory at once), but the upside is theres's less overhead becuase there are no thunks(the technical temr for promise)
+    - lazy: they are stored in chuncks(not to be confused with thunks!), each chunk has a size of 64K. This is cool because it won't cause the memory usage to skyrocket and the 64K probably fits neatly into your CUP's L2 cache.
+  - `Date.ByteString.Lazy.pack`: `pack:: [Word8] -> ByteString` takes list of bytes of type `Word8` and reutrns a `ByteString`, making it less lazy, so that it's lazy only at 64K intervals.
+    - `B.pack [99,97,110] -- "can"`
+  - `fromChunks` takes a list of strict bytestrings and converts it to a lazy bytestring. 
+  - `toChunks` takes a lazy bytestring and converts it to a list of strict ones.
+    - `B.toChunks $ B.fromChunks [S.pack [40,41,42], S.pack [43,44,45], S.pack [46,47,48,49]] -- ["()*","+,-","./01"]`
 

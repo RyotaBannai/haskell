@@ -1,5 +1,7 @@
 module Randomness where
 
+import qualified Data.ByteString.Lazy as ByteString
+import qualified Data.Text.Encoding as Text
 import System.Random
 
 -- we don't have to `random gen :: (Bool, StdGen)` because we do type declaration.
@@ -21,3 +23,6 @@ finiteRandoms n gen =
    in (value : restOfList, lastGen)
 
 -- finiteRandoms 10 (mkStdGen 10) :: ([Float], StdGen)
+
+-- Checkout String byteString conversions: https://qiita.com/satosystems/items/e07e9907e4da9ab853fc
+convert = ByteString.fromStrict . Text.encodeUtf8
