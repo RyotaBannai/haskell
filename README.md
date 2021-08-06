@@ -89,4 +89,5 @@
   - `fromChunks` takes a list of strict bytestrings and converts it to a lazy bytestring. 
   - `toChunks` takes a lazy bytestring and converts it to a list of strict ones.
     - `B.toChunks $ B.fromChunks [S.pack [40,41,42], S.pack [43,44,45], S.pack [46,47,48,49]] -- ["()*","+,-","./01"]`
-
+- `Execption with pure functions?`:
+  - Once pure functions start throwing `exceptions`, it matters when they are evaluated(although pure functions are lazy by default, which means that we don't know when they will be evaluated and that it shouln't matter). That's why we `can only catch exceptions thrown` from pure functions `in the I/O part of our code`. And that's bad, because we want to `keep the I/O part as small as possible`. However, if we don't catch them in the I/O part of our code, our program crashes. The solution? `Don't mix exceptions and pure code`. Take advantage of Haskell's powerful type system and use types like `Either` and `Maybe` to represent results that may have failed.

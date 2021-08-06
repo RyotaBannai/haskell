@@ -1,17 +1,51 @@
 module Main where
 
 import qualified Baby
+import Control.Exception
 import Control.Monad
 import Data.Char
 import Data.List
 import System.Directory
 import System.Environment
 import System.IO
+import System.IO.Error
 import System.Random
 
 -- main always has a type signate of main :: IO something
 main :: IO ()
-main = guessNumber
+main = toTry `catch` betterHandler
+
+toTry :: IO ()
+toTry = do
+  (fileName : _) <- getArgs
+  contents <- readFile fileName
+  putStrLn $ "The file has " ++ show (length (lines contents)) ++ " lines!"
+
+betterHandler :: IOError -> IO ()
+betterHandler e
+  -- isDoesNotExistError and ioError are from System.IO.Error
+  -- ioe https://downloads.haskell.org/~ghc/6.10.1/docs/html/libraries/base/System-IO-Error.html#3
+  | isDoesNotExistError e = case ioeGetFileName e of
+    Just path -> putStrLn $ "The file (" ++ path ++ ") doesn't exist"
+    Nothing -> putStrLn "Whoops! File doesn't exist at unknon location."
+  | otherwise = ioError e
+
+{-
+We re-throw the exception that was passed by the handler with the `ioError` function. It has a type of `ioError :: IOException -> IO a`, so it takes an `IOError` and produces an `I/O action` that will throw it. The `I/O action` has `a` type of `IO a`, because it never actually yields a result, so it can act as `IO anything`.
+-}
+
+handler :: IOError -> IO ()
+handler e = putStrLn "The file doesn't exist"
+
+checkLineLength :: IO ()
+checkLineLength = do
+  (fileName : _) <- getArgs
+  fileExists <- doesFileExist fileName --  We can't just use doesFileExist in an if expression directly.
+  if fileExists
+    then do
+      contents <- readFile fileName
+      putStrLn $ "The file has " ++ show (length (lines contents)) ++ " lines!"
+    else do putStrLn "The file doesn't exist"
 
 guessNumber :: IO ()
 guessNumber = do
