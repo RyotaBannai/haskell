@@ -7,15 +7,41 @@ import Data.List
 import System.Directory
 import System.Environment
 import System.IO
+import System.Random
 
 -- main always has a type signate of main :: IO something
 main :: IO ()
-main = gate
+main = guessNumber
+
+guessNumber :: IO ()
+guessNumber = do
+  gen <- getStdGen
+  askForNumber gen
+
+askForNumber :: StdGen -> IO ()
+askForNumber gen = do
+  let (randomNumber, newGen) = randomR (1, 10) gen :: (Int, StdGen)
+  putStrLn "Which number in the range from 1 to 10 am I thinking of?"
+  numberString <- getLine
+  let parsedList = reads numberString :: [(Int, String)]
+  -- unless (null numberString)
+  -- if doesn't satisfied `when` clause, `returns ()`, which is empty I/O
+  when (not $ null parsedList) $ do
+    let [(number, _)] = parsedList
+    if number == randomNumber
+      then putStrLn "You are correct!"
+      else putStrLn $ "Sorry, it was " ++ show randomNumber
+    askForNumber newGen
+
+getRandStr :: IO ()
+getRandStr = do
+  gen <- getStdGen
+  putStrLn $ take 20 (randomRs ('a', 'z') gen)
 
 {-
 :run with arguments
 `cabal run --help`
-$ cabal run haskell -O2 remove "resources/todo.txt" 1
+$ cabal run haskell -O2 delete "resources/todo.txt" 1
 -}
 
 gate :: IO ()
@@ -25,7 +51,7 @@ gate = do
   action args
 
 dispatch :: [(String, [String] -> IO ())]
-dispatch = [("add", addTodo), ("view", view), ("remove", deleteTodo)]
+dispatch = [("add", addTodo), ("view", view), ("delete", deleteTodo)]
 
 view :: [String] -> IO ()
 view [todoFilePath] = do

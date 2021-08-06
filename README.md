@@ -64,3 +64,20 @@
     - `:t putStrLn`: `putStrLn :: Strin -> IO ()`
   - `Don't think` of a function like `putStrLn` as a function that `takes a string and prints it to the screen`:
     - Think of it as a function that `takes a string and returns an I/O action`. That I/O action will, when performed, print beautiful poetry to your terminal.
+- `Referential transparency`: a function, if `given the same parameters twice`, `must produce the same result twice`.
+- `Randomness`:
+  - `RandomGen` typeclass is for types that can act as `sources of randomness`.
+  - `Random` typelcass is for things that can take on random values.
+  - `random :: (RandomGen g, Random a) => g -> (a, g)` := `random` returns new `RandomGen` too
+    - i.g. `random (mkStdGen 100)`: manurally make a random geneartor.
+      - get other types other than Int, `random (mkStdGen 100) :: (Float, StdGen)`
+- `reads`: `read` without throwing en exception.
+  - samples:
+    - `reads "1 2 3" :: [(Int, String)]                 -- [(1," 2 3")]`
+    - `reads "(1,2) (3,4)" :: [((Int, Int), String)]    -- [((1,2)," (3,4)")]`
+    - `reads "(1,2)(3,4)" :: [((Int, Int), String)]     -- [((1,2),"(3,4)")]`
+    - `reads "(1,2)\n(3,4)" :: [((Int, Int), String)]   -- [((1,2),"\n(3,4)")]`
+    - `reads "(1,2)    (3,4)" :: [((Int, Int), String)] -- [((1,2),"    (3,4)")]`
+  - `reads` returns empty list when doesn't match:
+    - `null $ (reads "aa" :: [(Int, String)]) -- True`
+
