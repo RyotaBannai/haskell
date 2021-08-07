@@ -92,3 +92,7 @@
 - `Execption with pure functions?`:
   - Once pure functions start throwing `exceptions`, it matters when they are evaluated(although pure functions are lazy by default, which means that we don't know when they will be evaluated and that it shouln't matter). That's why we `can only catch exceptions thrown` from pure functions `in the I/O part of our code`. And that's bad, because we want to `keep the I/O part as small as possible`. However, if we don't catch them in the I/O part of our code, our program crashes. The solution? `Don't mix exceptions and pure code`. Take advantage of Haskell's powerful type system and use types like `Either` and `Maybe` to represent results that may have failed.
 - Protip: it really helps to first think what the type declaration of a function should be before concerning ourselves with the implementation and then write it down. In Haskell, a function's type declaration tells us a whole lot about the function, due to the very strong type system.
+- You could write `(->) r` as `(r ->)`
+  - `fmap :: (a -> b) -> (r -> a) -> (r -> b)`: we see that it takes `a function from a to b` and `a function from r to a` and returns `a function from r to b`. 
+  - `instance Functor (r ->) where fmap f g = (\x -> f (g x))`:
+    - `fmap (*3) (+100)`: `f := (*3)`, `g := (+100)`, therefore `fmap (*3) (+100) 1` results in `303`. same as `function comopsition` `fmap (*3) (+100) equals (*3) . (+100)`
