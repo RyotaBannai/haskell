@@ -1,10 +1,10 @@
 module Main where
 
-import qualified Baby
 import Control.Exception
 import Control.Monad
 import Data.Char
 import Data.List
+import qualified HeathrowToLondon
 import System.Directory
 import System.Environment
 import System.IO
@@ -13,7 +13,10 @@ import System.Random
 
 -- main always has a type signate of main :: IO something
 main :: IO ()
-main = toTry `catch` betterHandler
+main = HeathrowToLondon.calcBestPath
+
+main' :: IO ()
+main' = toTry `catch` betterHandler
 
 toTry :: IO ()
 toTry = do

@@ -33,6 +33,7 @@ library
     Geometry.Cuboid
     Geometry.Sphere
     Hof
+    HeathrowToLondon
     Modules
     MyIOCodes
     Person
