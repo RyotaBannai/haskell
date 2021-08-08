@@ -2,8 +2,10 @@ module FunctorCodes where
 
 import Control.Applicative
 import Data.Char
+import qualified Data.Foldable as F
 import Data.List
 import Data.Monoid
+import DataTypeAndTypeclasses (Tree (EmptyTree, Node), treeInsert)
 
 -- reverse text
 simple :: IO ()
@@ -99,3 +101,52 @@ instance Functor (Pair c) where
 -- Monoids:
 re :: Integer
 re = getProduct . mconcat $ map Product [3, 4, 5]
+
+-- instead of writing:
+lengthCompare :: String -> String -> Ordering
+lengthCompare x y =
+  let a = length x `compare` length y
+      b = x `compare` y
+   in if a == EQ then b else a
+
+-- we can do this since we understand how Ordering monoid is implemented:
+lengthCompare' :: String -> String -> Ordering
+lengthCompare' x y =
+  (length x `compare` length y) -- we must add more important criterion first.
+  -- `mappend` (vowels x `compare` vowels x) -- we can add criteroon as many as we want.
+    <> (x `compare` y)
+
+-- get First result >> Just 9
+fre :: Maybe Integer
+fre = getFirst . mconcat . map First $ [Nothing, Just 9, Just 10]
+
+-- gete Last result >> Just "two"
+lre :: Maybe [Char]
+lre = getLast $ Last (Just "one") <> Last (Just "two")
+
+-- Foldable for Tree
+-- We have a Foldable instance for our tree type, we get `foldr` and `foldl` for free!
+instance F.Foldable Tree where
+  foldMap f EmptyTree = mempty -- if a tree is empty, the monoid value it becomes is `mempty`
+  foldMap f (Node x l r) =
+    F.foldMap f l
+      <> f x
+      <> F.foldMap f r
+
+treeValues :: [Integer]
+treeValues = [5, 4, 2, 6, 3, 7, 8, 1]
+
+testTree :: Tree Integer
+testTree = foldr treeInsert EmptyTree treeValues
+
+-- Should equals to `sum treeValues` >> 36
+treeValsSum :: Integer
+treeValsSum = F.foldl (+) 0 testTree
+
+-- Check if we want to know if any number in our tree is equal to 3, we can do this:
+-- `foldMap` applies this function to every element in our tree and then reduces the resulting `monoids` into a single `monoid` with `mappend`
+checkTree :: Bool
+checkTree = getAny $ F.foldMap (\x -> Any $ x == 3) testTree -- `Any`, `All` from `Data.Monoid`
+
+getBackTreeValues :: [Integer]
+getBackTreeValues = F.foldMap (: []) testTree -- (: []) := (\x -> [x])
