@@ -85,3 +85,12 @@ sequenceA [[1,2],[3,4]]
 ‘Prelude.sequenceA’ has the same method
 (and originally defined in ‘Data.Traversable’
 -}
+
+-- use `newtype` to get the ability to apply function on only specific component of tuple:
+newtype Pair b a = Pair {getPair :: (a, b)}
+
+instance Functor (Pair c) where
+  fmap f (Pair (x, y)) = Pair (f x, y)
+
+-- getPair $ fmap (*100) (Pair (2,3)) >> (200, 3)
+-- getPair $ fmap reverse  (Pair ("los angeles",3)) >> ("selegna sol",3)

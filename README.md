@@ -102,3 +102,9 @@
   - `pure (.) <*> u <*> v <*> w = u <*> (v <*> w)`
   - `pure f <*> pure x = pure (f x)`
   - `u <*> pure y = pure ($ y) <*> u`
+- `newtype`:
+  - When we use `newtype` to wrap `an existing type`(i.g., `[Char]`, `Int`, etc.), the type that we get is separate from the original type. If we make the following newtype: `newtype CharList = CharList { getCharList :: [Char] }`, WEe can't use `++` to put together a `CharList` and a list of type `[Char]`. We can't even use `++` to put together two `CharLists`, because `++` works only on `lists` and the `CharList` type isn't a list, even though it could be said that it contains one. We can, however, convert two `CharLists` to `lists`, `++` them and then convert that back to a `CharList`(by extarct with a method, in this case `getCharList`. this converts newtype to original type). 
+- `data` vs `type` vs `newtype`:
+  - If you just want your type signatures to look cleaner and be more descriptive, you probably want `type synonyms`. 
+  - If you want to take an existing type and wrap it in a new type in order to `make it an instance of a type class`, chances are you're looking for a `newtype`, and 
+  - If you want to make something `completely new`, odds are good that you're looking for the `data` keyword.
