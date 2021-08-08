@@ -3,6 +3,7 @@ module FunctorCodes where
 import Control.Applicative
 import Data.Char
 import Data.List
+import Data.Monoid
 
 -- reverse text
 simple :: IO ()
@@ -94,3 +95,7 @@ instance Functor (Pair c) where
 
 -- getPair $ fmap (*100) (Pair (2,3)) >> (200, 3)
 -- getPair $ fmap reverse  (Pair ("los angeles",3)) >> ("selegna sol",3)
+
+-- Monoids:
+re :: Integer
+re = getProduct . mconcat $ map Product [3, 4, 5]

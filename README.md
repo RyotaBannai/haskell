@@ -108,3 +108,8 @@
   - If you just want your type signatures to look cleaner and be more descriptive, you probably want `type synonyms`. 
   - If you want to take an existing type and wrap it in a new type in order to `make it an instance of a type class`, chances are you're looking for a `newtype`, and 
   - If you want to make something `completely new`, odds are good that you're looking for the `data` keyword.
+- `Monoids laws`:
+  - ``mempty `mappend` x = x`` -- identity law
+  - ``x `mappend` mempty = x`` -- identity law
+  - ``(x `mappend` y) `mappend` z = x `mappend` (y `mappend` z)`` -- associative law
+
