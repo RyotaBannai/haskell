@@ -96,3 +96,9 @@
   - `fmap :: (a -> b) -> (r -> a) -> (r -> b)`: we see that it takes `a function from a to b` and `a function from r to a` and returns `a function from r to b`. 
   - `instance Functor (r ->) where fmap f g = (\x -> f (g x))`:
     - `fmap (*3) (+100)`: `f := (*3)`, `g := (+100)`, therefore `fmap (*3) (+100) 1` results in `303`. same as `function comopsition` `fmap (*3) (+100) equals (*3) . (+100)`
+- `Applicative functors laws`:
+  - `pure f <*> x = fmap f x`
+  - `pure id <*> v = v`
+  - `pure (.) <*> u <*> v <*> w = u <*> (v <*> w)`
+  - `pure f <*> pure x = pure (f x)`
+  - `u <*> pure y = pure ($ y) <*> u`
