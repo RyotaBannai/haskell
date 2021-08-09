@@ -113,3 +113,6 @@
   - ``x `mappend` mempty = x`` -- identity law
   - ``(x `mappend` y) `mappend` z = x `mappend` (y `mappend` z)`` -- associative law
 
+- [implementation-of-foldable-in-haskell](https://stackoverflow.com/questions/29295823/implementation-of-foldable-in-haskell)
+  - You don't need the Monoid part at all(conversion from Int to Sum Monoid in add operation) - the default implementations work just fine(it's most likely not obvious `how foldr1 (+) can be expressed just in terms of foldMap`).
+- [Foldable and Traversable](https://blog.jakuba.net/2014-07-30-foldable-and-traversable/)

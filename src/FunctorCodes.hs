@@ -113,8 +113,8 @@ lengthCompare x y =
 lengthCompare' :: String -> String -> Ordering
 lengthCompare' x y =
   (length x `compare` length y) -- we must add more important criterion first.
-  -- `mappend` (vowels x `compare` vowels x) -- we can add criteroon as many as we want.
-    <> (x `compare` y)
+  -- `<>` (vowels x `compare` vowels x) -- we can add criteron as many as we want.
+    <> (x `compare` y) -- `<>` is an alias for `mappend`
 
 -- get First result >> Just 9
 fre :: Maybe Integer
@@ -126,6 +126,7 @@ lre = getLast $ Last (Just "one") <> Last (Just "two")
 
 -- Foldable for Tree
 -- We have a Foldable instance for our tree type, we get `foldr` and `foldl` for free!
+-- foldMap' :: (Foldable f, Monoid m) => (a -> m) -> f a -> m
 instance F.Foldable Tree where
   foldMap f EmptyTree = mempty -- if a tree is empty, the monoid value it becomes is `mempty`
   foldMap f (Node x l r) =
@@ -141,7 +142,7 @@ testTree = foldr treeInsert EmptyTree treeValues
 
 -- Should equals to `sum treeValues` >> 36
 treeValsSum :: Integer
-treeValsSum = F.foldl (+) 0 testTree
+treeValsSum = F.foldl (+) 0 testTree -- F.foldl1 (+) testTree
 
 -- Check if we want to know if any number in our tree is equal to 3, we can do this:
 -- `foldMap` applies this function to every element in our tree and then reduces the resulting `monoids` into a single `monoid` with `mappend`
