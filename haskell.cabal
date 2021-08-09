@@ -38,6 +38,7 @@ library
     Modules
     MonadCodes
     MyIOCodes
+    KnightsQueat
     Person
     Randomness
     Recursion
