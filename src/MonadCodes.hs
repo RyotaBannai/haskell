@@ -83,3 +83,15 @@ However, if guard fails, then so will the `return` later on, because feeding an 
 -}
 getOnlyContains7 :: [Integer]
 getOnlyContains7 = [1 .. 50] >>= (\x -> guard ('7' `elem` show x) >> return x)
+
+-- Monad functions composition
+f :: Num a => a -> [a]
+f x = [x, - x]
+
+g :: Num a => a -> [a]
+g x = [x * 3, x * 2]
+
+-- the order of apply Monad functions shouldn't matter.
+-- h 3 # [9,-9,6,-6]
+h :: Integer -> [Integer]
+h = f <=< g
