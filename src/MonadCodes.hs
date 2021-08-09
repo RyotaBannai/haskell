@@ -1,5 +1,7 @@
 module MonadCodes where
 
+import Control.Monad
+
 -- Just 3 `applyMaybe` \x -> Just (x+1) # Just 4
 applyMaybe :: Maybe t -> (t -> Maybe a) -> Maybe a
 applyMaybe Nothing f = Nothing
@@ -38,3 +40,46 @@ landRight' n (left, right)
 -- return (0,0) >>= landLeft' 1 >>= landRight' 1 >>= banana >>= landRight' 1 # Nothing
 banana :: Pole -> Maybe Pole
 banana _ = Nothing
+
+nestedMonad :: Maybe String
+nestedMonad =
+  Just 3
+    >>= ( \x ->
+            Just "!"
+              >>= ( \y -> Just (show x)
+                  )
+        )
+
+-- improved
+nestedMonad' :: Maybe String
+nestedMonad' = do
+  x <- Just 3 -- extract a value from Maybe temporarily
+  y <- Just "!"
+  Just (show x ++ y)
+
+{-
+It's important to remember that `do` expressions are just different syntax for chaining monadic values.
+-}
+
+-- tightwalker's routine
+-- # Just (3,2)
+routine :: Maybe Pole
+routine = do
+  let start = (0, 0)
+  first <- landLeft' 2 start
+  -- Nothing # this is equivalent to `banana`
+  second <- landRight' 2 first
+  landLeft' 1 second
+
+-- Monadic do expression fails in a pattern matching, but return value in `fail` method # Nothing
+wopwop :: Maybe Char
+wopwop = do
+  (x : xs) <- Just ""
+  return x
+
+{-
+If `gaurd` succeeds, teh result contained within it is an empty tuple. So then, we use `>>` to ignore that empty  tuple and present something else as the result.
+However, if guard fails, then so will the `return` later on, because feeding an empty list to a fucntion with `>>=` always results in an empty list.
+-}
+getOnlyContains7 :: [Integer]
+getOnlyContains7 = [1 .. 50] >>= (\x -> guard ('7' `elem` show x) >> return x)

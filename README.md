@@ -121,3 +121,5 @@
     - takes a monadic value (that is, a value with a context) and feeds it to a function that takes a normal value but returns a monadic value(normal value `a` to convert fancy value `m b` with a function `a -> mb`).
   - `>>`: Instead of making functions that ignore their input and just return a predetermined monadic value, we can use `>>` function
     - `m >> n = m >>= \_ -> n` where type definition is `(>>) :: (Monad m) => m a -> m b -> m b`
+  - In fact, `list comprehensions` are just syntactic sugar for using `lists as monads`. In the end, `list comprehensions` and `lists in do notation` translate to using `>>=` to do computations that feature non-determinism. 
+  - `filtering in list comprehensions` is the same as using `guard`. 
