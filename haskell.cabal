@@ -36,6 +36,7 @@ library
     HeathrowToLondon
     Hof
     Modules
+    MonadCodes
     MyIOCodes
     Person
     Randomness

@@ -116,3 +116,8 @@
 - [implementation-of-foldable-in-haskell](https://stackoverflow.com/questions/29295823/implementation-of-foldable-in-haskell)
   - You don't need the Monoid part at all(conversion from Int to Sum Monoid in add operation) - the default implementations work just fine(it's most likely not obvious `how foldr1 (+) can be expressed just in terms of foldMap`).
 - [Foldable and Traversable](https://blog.jakuba.net/2014-07-30-foldable-and-traversable/)
+- `Monads`:
+  - `(>>=) :: (Monad m) => m a -> (a -> m b) -> m b`: `(>>=)`: bind 
+    - takes a monadic value (that is, a value with a context) and feeds it to a function that takes a normal value but returns a monadic value(normal value `a` to convert fancy value `m b` with a function `a -> mb`).
+  - `>>`: Instead of making functions that ignore their input and just return a predetermined monadic value, we can use `>>` function
+    - `m >> n = m >>= \_ -> n` where type definition is `(>>) :: (Monad m) => m a -> m b -> m b`
