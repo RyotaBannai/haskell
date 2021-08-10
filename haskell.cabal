@@ -35,10 +35,11 @@ library
     Geometry.Sphere
     HeathrowToLondon
     Hof
+    KnightsQueat
     Modules
     MonadCodes
+    MoreMonadCodes
     MyIOCodes
-    KnightsQueat
     Person
     Randomness
     Recursion
