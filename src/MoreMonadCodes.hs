@@ -59,5 +59,7 @@ multWithLog :: Writer [String] Int
 multWithLog = do
   a <- logNumber 3
   b <- logNumber 5
-  tell ["Gonna multiply these two"] -- tell := takes a monoid value, like that list and creates a `Writer` value that presents the dummy value () as its result but has our desired monoid value attached. (attach an extra log message to each logs)
+  tell ["Gonna multiply these two"]
+  -- tell := takes a monoid value, like that list and creates a `Writer` value that presents the dummy value () as its result but has our desired monoid value attached. (attach an extra log message to each logs)
+  -- if we define `[String]`, `Writer` stacks logs as `[String]`, but if we define just `String`, `Writer` concats strings as it should be.
   return (a * b)
