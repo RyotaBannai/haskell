@@ -44,3 +44,20 @@ runWriter (return 3 :: Writer String Int)        # (3,"")
 runWriter (return 3 :: Writer (Sum Int) Int)     # (3,Sum {getSum = 0})
 runWriter (return 3 :: Writer (Product Int) Int) # (3,Product {getProduct = 1})
 -}
+
+{-
+Reader and Writer:
+- https://blog.ssanj.net/posts/2018-01-12-stacking-the-readert-writert-monad-transformer-stack-in-haskell.html
+- https://stackoverflow.com/questions/11684321/how-to-play-with-control-monad-writer-in-haskell
+-}
+-- runWriter multWithLog to get tuple inside
+-- runWriterT multWithLog to get `Identity`
+logNumber :: Int -> Writer [String] Int
+logNumber x = writer (x, ["Got number: " ++ show x])
+
+multWithLog :: Writer [String] Int
+multWithLog = do
+  a <- logNumber 3
+  b <- logNumber 5
+  tell ["Gonna multiply these two"] -- tell := takes a monoid value, like that list and creates a `Writer` value that presents the dummy value () as its result but has our desired monoid value attached. (attach an extra log message to each logs)
+  return (a * b)
