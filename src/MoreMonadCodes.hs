@@ -4,6 +4,7 @@ import Control.Monad
 import Control.Monad.Except
 import Control.Monad.State
 import Control.Monad.Writer
+import Data.List
 import Data.Monoid
 import Data.Semigroup
 import GHC.Base
@@ -220,3 +221,70 @@ routine = do
   second <- landRight' 2 first
   third <- landLeft' 1 second
   banana third
+
+-- liftM := fmap for Monads
+re1 :: (Bool, [Char])
+re1 = runWriter $ liftM not $ writer (True, "chickpeas")
+
+re2 :: (Int, Stack)
+re2 = runState (liftM (+ 100) pop) [1 .. 4]
+
+-- liftM2 := binary operator
+-- Just [4,4]
+re3 :: Maybe [Integer]
+re3 = Prelude.foldr (liftM2 (:)) (return []) [Just 4, Just 4]
+
+-- join function := flatten a `nested monadic value` to a `monadic value`.
+-- ((),[10,1,2,0,0,0])
+re4 :: ((), Stack)
+re4 = runState (join (state $ \s -> (push 10, 1 : 2 : s))) [0, 0, 0]
+
+-- filterM
+-- use Predicate with returning Monad(:= Monadic predicate)
+-- mapM_ putStrLn . snd . runWriter $ filterM keepSmall [0,6,2,3,7,9,1]
+keepSmall :: Int -> Writer [String] Bool
+keepSmall x
+  | x < 4 = do
+    tell ["Keeping: " ++ show x]
+    return True
+  | otherwise = do
+    tell [show x ++ " is too large, throwing it away"]
+    return False
+
+{-
+powerset [1,2,3] # [[1,2,3],[1,2],[1,3],[1],[2,3],[2],[3],[]]
+1 -> [True, False] -> [[1], []]
+2 -> [True, False] -> [[1,2], [1], [2]]
+3 -> [True, False] -> [[1,2,3], [1,2], [1,3], [1], [2,3], [2], [3], []]
+-}
+powerset :: [a] -> [[a]]
+powerset = filterM (const [True, False]) -- \x -> [True, False]
+
+-- Safe RPN
+solveRPN :: String -> Maybe Double
+solveRPN st = do
+  {-
+  We pattern match here, so if the list has more than one value or none at all, the pattern match fails and a Nothing is produced.
+  -}
+  [result] <- foldM foldingFunction [] (words st)
+  return result
+
+foldingFunction :: [Double] -> String -> Maybe [Double]
+foldingFunction (x : y : ys) "*" = return ((x * y) : ys)
+foldingFunction (x : y : ys) "+" = return ((x + y) : ys)
+foldingFunction (x : y : ys) "-" = return ((x - y) : ys)
+foldingFunction (x : y : ys) "/" = return ((x / y) : ys)
+foldingFunction (x : y : ys) "^" = return ((x ** y) : ys)
+foldingFunction (x : xs) "ln" = return (log x : xs)
+foldingFunction xs "sum" = return [sum xs]
+{-
+If the stack xs is [1.0,2.0] and readMaybe numberString results in a Just 3.0, the result is Just [3.0,1.0,2.0]. If readMaybe numberString results in a Nothing then the result is Nothing.
+-}
+foldingFunction xs numberString = liftM (: xs) (readMaybe numberString)
+
+-- readMaybe "1" :: Maybe Int           # Just 1
+-- readMaybe "GO TO HELL" :: Maybe Int  # Nothing
+readMaybe :: (Read a) => String -> Maybe a
+readMaybe st = case reads st of
+  [(x, "")] -> Just x
+  _ -> Nothing
