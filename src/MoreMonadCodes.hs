@@ -1,10 +1,12 @@
 module MoreMonadCodes where
 
 import Control.Monad
+import Control.Monad.State
 import Control.Monad.Writer
 import Data.Monoid
 import Data.Semigroup
 import GHC.Base
+import System.Random
 
 isBigBang :: (Ord a, Num a) => a -> (Bool, String)
 isBigBang x = (x > 9, "Compared gang size to 9.")
@@ -150,3 +152,39 @@ addStuff = do
   a <- (* 2)
   b <- (+ 10)
   return (a + b)
+
+{-
+newtype State s a = State { runState :: s -> (a,s) }
+
+instance Monad (State s) where
+  return x = State $ \s -> (x,s)
+  (State h) >>= f = State $ \s -> let (a, newState) = h s
+                                      (State g) = f a
+                                  in  g newState
+-}
+type Stack = [Int]
+
+pop :: State Stack Int
+pop = state $ \(x : xs) -> (x, xs)
+
+push :: Int -> State Stack ()
+push a = state $ \xs -> ((), a : xs)
+
+stackManip :: State Stack Int
+stackManip = do
+  push 3
+  a <- pop
+  pop
+
+-- Think about what is and how to set State value. In this case, RandomGen g is our state, and value is Random.
+-- runState randomSt (mkStdGen 33)
+randomSt :: (RandomGen g, Random a) => State g a
+randomSt = state random
+
+-- runState threeConins (mkStdGen 33)
+threeConins :: State StdGen (Bool, Bool, Bool)
+threeConins = do
+  a <- randomSt
+  b <- randomSt
+  c <- randomSt
+  return (a, b, c)
