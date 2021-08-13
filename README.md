@@ -136,4 +136,5 @@
       - `return (0,0) >>= landRight 2 >>= landLeft 2 >>= landRight 2` and `return (0,0) >>= (\x -> landRight 2 x >>= (\y -> landLeft 2 y >>= (\z -> landRight 2 z)))` are the same.
       - `f <=< (g <=< h) `should be the same as `(f <=< g) <=< h`.
 
-    
+- `Inefficient list construction`:
+  - When using the `Writer monad`, you have to be careful which `monoid` to use, because using lists can sometimes turn out to be very slow. That's because lists use `++` for `mappend` and using `++` to `add something to the end of a list` is slow if that list is really long. 

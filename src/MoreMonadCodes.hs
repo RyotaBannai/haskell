@@ -3,6 +3,7 @@ module MoreMonadCodes where
 import Control.Monad
 import Control.Monad.Writer
 import Data.Monoid
+import Data.Semigroup
 
 isBigBang :: (Ord a, Num a) => a -> (Bool, String)
 isBigBang x = (x > 9, "Compared gang size to 9.")
@@ -63,3 +64,78 @@ multWithLog = do
   -- tell := takes a monoid value, like that list and creates a `Writer` value that presents the dummy value () as its result but has our desired monoid value attached. (attach an extra log message to each logs)
   -- if we define `[String]`, `Writer` stacks logs as `[String]`, but if we define just `String`, `Writer` concats strings as it should be.
   return (a * b)
+
+gcd' :: Int -> Int -> Int
+gcd' a b
+  | b == 0 = a
+  | otherwise = gcd' b (a `mod` b)
+
+-- Debug final logs by `mapM_ putStrLn $ snd $ runWriter (gcd'WithWriter 8 3)`
+{-
+Append a log on the right `a ++ (b ++ (c ++ (d ++ (e ++ f))))`
+Lists are a data structure that's constructed from left to right, and this is efficient because we first fully construct the left part of a list and only then `add a longer list on the right`.
+-}
+gcd'WithWriter :: Int -> Int -> Writer [String] Int
+gcd'WithWriter a b
+  | b == 0 =
+    writer (a, ["Finished with " ++ show a])
+  | otherwise = do
+    tell [show a ++ " mod " ++ show b ++ " = " ++ show (a `mod` b)]
+    gcd'WithWriter b (a `mod` b)
+
+-- difference list
+-- fromDiffList (toDiffList [1..4] <> toDiffList [1..3])
+newtype DiffList a = DiffList {getDiffList :: [a] -> [a]}
+
+toDiffList :: [a] -> DiffList a
+toDiffList xs = DiffList (xs ++)
+
+fromDiffList :: DiffList a -> [a]
+fromDiffList (DiffList f) = f []
+
+instance Semigroup (DiffList a) where
+  (DiffList f) <> (DiffList g) = DiffList (f . g) -- \xs -> f (g x)
+
+instance Monoid (DiffList a) where
+  mempty = DiffList ([] ++) -- \xs -> [] ++ xs
+  (DiffList f) `mappend` (DiffList g) = DiffList (f . g)
+
+-- mapM_ putStrLn . fromDiffList . snd . runWriter $ gcdReverse 110 34
+gcdReverse :: Int -> Int -> Writer (DiffList String) Int
+gcdReverse a b
+  | b == 0 = do
+    tell (toDiffList ["Finished with " ++ show a])
+    return a
+  | otherwise = do
+    result <- gcdReverse b (a `mod` b)
+    tell (toDiffList [show a ++ " mod " ++ show b ++ " = " ++ show (a `mod` b)])
+    return result
+
+-- Comparing performance
+
+-- Run by `mapM_ putStrLn . fromDiffList . snd . runWriter $ finalCountDown 50000`
+finalCountDown :: Int -> Writer (DiffList String) ()
+finalCountDown 0 = do
+  tell (toDiffList ["0"])
+finalCountDown x = do
+  finalCountDown (x -1)
+  tell (toDiffList [show x])
+
+-- too slow impl with left associative of list
+-- Run by `mapM_ putStrLn . snd . runWriter $ finalCountDown' 500000`
+finalCountDown' :: Int -> Writer [String] ()
+finalCountDown' 0 = do
+  tell ["0"]
+finalCountDown' x = do
+  finalCountDown' (x -1)
+  tell [show x]
+
+-- Run by `mapM_ putStrLn . snd . runWriter $ finalCountDown'' 500000`
+-- The log order is reversed tho (print desc ord),
+-- it's faster than finalCountDown', but slower than finalCountDown
+finalCountDown'' :: Int -> Writer [String] ()
+finalCountDown'' 0 = do
+  tell ["0"]
+finalCountDown'' x = do
+  tell [show x]
+  finalCountDown'' (x -1)
