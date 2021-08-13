@@ -8,6 +8,7 @@ import Data.List
 import Data.Monoid
 import Data.Semigroup
 import GHC.Base
+import KnightsQueat (KnightPos, moveKnight)
 import MonadCodes (Birds, Pole (..), landLeft, landRight)
 import System.Random
 
@@ -288,3 +289,18 @@ readMaybe :: (Read a) => String -> Maybe a
 readMaybe st = case reads st of
   [(x, "")] -> Just x
   _ -> Nothing
+
+-- Just normal function composition. f 1
+f :: Integer -> Integer
+f = GHC.Base.foldr (.) id [(+ 1), (* 100), (+ 1)]
+
+-- General impl for KnightsQueat in3
+-- We use `return` to make a starting position, which is a `singleton list`
+inMany :: Int -> KnightPos -> [KnightPos]
+inMany x = Data.List.foldr (<=<) return (replicate x moveKnight)
+
+-- inMany x start = return start >>= Data.List.foldr (<=<) return (replicate x moveKnight)
+
+-- canReachIn 3 (1,1) (1,3) # True
+canReachIn :: Int -> KnightPos -> KnightPos -> Bool
+canReachIn x start end = end `elem` inMany x start
