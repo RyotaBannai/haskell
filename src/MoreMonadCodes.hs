@@ -4,6 +4,7 @@ import Control.Monad
 import Control.Monad.Writer
 import Data.Monoid
 import Data.Semigroup
+import GHC.Base
 
 isBigBang :: (Ord a, Num a) => a -> (Bool, String)
 isBigBang x = (x > 9, "Compared gang size to 9.")
@@ -139,3 +140,13 @@ finalCountDown'' 0 = do
 finalCountDown'' x = do
   tell [show x]
   finalCountDown'' (x -1)
+
+-- (+) <$> (*2) <*> (+10)
+-- This is the same thing as the `applicative` expression above (with `Applicative functor`), only now it relies on functions being `monads`.
+-- A `do expression` always results in `a monadic value` and this one is no different.
+-- `The result of this monadic value is a function` a and b are the result of that each functions are applied to incoming number.
+addStuff :: Int -> Int
+addStuff = do
+  a <- (* 2)
+  b <- (+ 10)
+  return (a + b)

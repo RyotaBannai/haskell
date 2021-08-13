@@ -92,16 +92,22 @@
 - `Execption with pure functions?`:
   - Once pure functions start throwing `exceptions`, it matters when they are evaluated(although pure functions are lazy by default, which means that we don't know when they will be evaluated and that it shouln't matter). That's why we `can only catch exceptions thrown` from pure functions `in the I/O part of our code`. And that's bad, because we want to `keep the I/O part as small as possible`. However, if we don't catch them in the I/O part of our code, our program crashes. The solution? `Don't mix exceptions and pure code`. Take advantage of Haskell's powerful type system and use types like `Either` and `Maybe` to represent results that may have failed.
 - Protip: it really helps to first think what the type declaration of a function should be before concerning ourselves with the implementation and then write it down. In Haskell, a function's type declaration tells us a whole lot about the function, due to the very strong type system.
-- You could write `(->) r` as `(r ->)`
-  - `fmap :: (a -> b) -> (r -> a) -> (r -> b)`: we see that it takes `a function from a to b` and `a function from r to a` and returns `a function from r to b`. 
-  - `instance Functor (r ->) where fmap f g = (\x -> f (g x))`:
-    - `fmap (*3) (+100)`: `f := (*3)`, `g := (+100)`, therefore `fmap (*3) (+100) 1` results in `303`. same as `function comopsition` `fmap (*3) (+100) equals (*3) . (+100)`
-- `Applicative functors laws`:
-  - `pure f <*> x = fmap f x`
-  - `pure id <*> v = v`
-  - `pure (.) <*> u <*> v <*> w = u <*> (v <*> w)`
-  - `pure f <*> pure x = pure (f x)`
-  - `u <*> pure y = pure ($ y) <*> u`
+- `Functor`:
+  - `(->) r` is an instance of Functor
+  - Not only is the function type `(->) r` a `functor` and an `applicative functor`, but it's also a `monad`. Just like other `monadic values`, `a function can also be considered a value with a context`. The context for functions is that that value is not present yet and that we have to apply that function to something in order to get its result value.
+    - function's Monad instance is locaded in `Control.Monad.Instances`
+  - You could write `(->) r` as `(r ->)`
+    - `fmap :: (a -> b) -> (r -> a) -> (r -> b)`: we see that it takes `a function from a to b` and `a function from r to a` and returns `a function from r to b`. 
+    - `instance Functor (r ->) where fmap f g = (\x -> f (g x))`:
+      - `fmap (*3) (+100)`: `f := (*3)`, `g := (+100)`, therefore `fmap (*3) (+100) 1` results in `303`. same as `function comopsition` `fmap (*3) (+100) equals (*3) . (+100)`
+- `Applicative`:
+  - `((+) <$> (*2) <*> (+10)) 4`: apply 4 to each patially applied functions and then combine the results of each fully applied functions.
+  - `Applicative functors laws`:
+    - `pure f <*> x = fmap f x`
+    - `pure id <*> v = v`
+    - `pure (.) <*> u <*> v <*> w = u <*> (v <*> w)`
+    - `pure f <*> pure x = pure (f x)`
+    - `u <*> pure y = pure ($ y) <*> u`
 - `newtype`:
   - When we use `newtype` to wrap `an existing type`(i.g., `[Char]`, `Int`, etc.), the type that we get is separate from the original type. If we make the following newtype: `newtype CharList = CharList { getCharList :: [Char] }`, WEe can't use `++` to put together a `CharList` and a list of type `[Char]`. We can't even use `++` to put together two `CharLists`, because `++` works only on `lists` and the `CharList` type isn't a list, even though it could be said that it contains one. We can, however, convert two `CharLists` to `lists`, `++` them and then convert that back to a `CharList`(by extarct with a method, in this case `getCharList`. this converts newtype to original type). 
 - `data` vs `type` vs `newtype`:
