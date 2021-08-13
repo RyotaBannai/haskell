@@ -1,11 +1,14 @@
 module MoreMonadCodes where
 
+import Control.Applicative
 import Control.Monad
 import Control.Monad.Except
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.State
 import Control.Monad.Writer
 import Data.List
 import Data.Monoid
+import Data.Ratio
 import Data.Semigroup
 import GHC.Base
 import KnightsQueat (KnightPos, moveKnight)
@@ -304,3 +307,54 @@ inMany x = Data.List.foldr (<=<) return (replicate x moveKnight)
 -- canReachIn 3 (1,1) (1,3) # True
 canReachIn :: Int -> KnightPos -> KnightPos -> Bool
 canReachIn x start end = end `elem` inMany x start
+
+-- Impl Monad
+thisSituation :: Prob (Prob Char)
+thisSituation =
+  Prob
+    [ (Prob [('a', 1 % 2), ('b', 1 % 2)], 1 % 4),
+      (Prob [('c', 1 % 2), ('d', 1 % 2)], 3 % 4)
+    ]
+
+newtype Prob a = Prob {getProb :: [(a, Rational)]} deriving (Show)
+
+-- fmap negate (Prob [(3,1%2),(5,1%4),(9,1%4)])
+instance Functor Prob where
+  fmap f (Prob xs) = Prob $ map (\(x, p) -> (f x, p)) xs -- Data.Bifunctor.first f
+
+-- concat := the concatenation of all the elements of a cointainer of lifes. i.g. concat ([[1, 2, 3], [3..4]])
+-- https://hackage.haskell.org/package/base-4.15.0.0/docs/Data-Foldable.html#g:5
+flatten :: Prob (Prob a) -> Prob a
+flatten (Prob xs) = Prob $ concat $ map multAll xs
+  where
+    -- multAll :: (Prob a, Rational) -> [(a, Rational)]
+    multAll (Prob innerxs, p) = map (\(x, r) -> (x, p * r)) innerxs
+
+instance Applicative Prob where
+  pure x = Prob [(x, 1 % 1)]
+
+-- Prob f <*> Prob [(x, p)] = Prob [(x, p)]
+-- key in this chap := how to impl `>>=`
+-- Notice that its type is Prob (Prob Char) above `thisSituation`. So now that we've figure out how to flatten a nested probability list, all we have to do is write the code for this and then we can write `>>=` simply as join (fmap f m)
+instance Monad Prob where
+  -- (fmap f m) := (Prob b), but just return (Prob b) becomes Prob (Prob b)
+  m >>= f = flatten (fmap f m)
+
+instance Fail.MonadFail Prob where
+  fail _ = Prob []
+
+data Coin = Heads | Tails deriving (Show, Eq)
+
+coin :: Prob Coin
+coin = Prob [(Heads, 1 % 2), (Tails, 1 % 2)]
+
+loadedCoin :: Prob Coin
+loadedCoin = Prob [(Heads, 1 % 10), (Tails, 9 % 10)]
+
+-- All three of them will land tails nine times out of forty
+flipThree :: Prob Bool
+flipThree = do
+  a <- coin
+  b <- coin
+  c <- loadedCoin
+  return (all (== Tails) [a, b, c])
