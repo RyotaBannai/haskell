@@ -1,11 +1,13 @@
 module MoreMonadCodes where
 
 import Control.Monad
+import Control.Monad.Except
 import Control.Monad.State
 import Control.Monad.Writer
 import Data.Monoid
 import Data.Semigroup
 import GHC.Base
+import MonadCodes (Birds, Pole (..), landLeft, landRight)
 import System.Random
 
 isBigBang :: (Ord a, Num a) => a -> (Bool, String)
@@ -188,3 +190,33 @@ threeConins = do
   b <- randomSt
   c <- randomSt
   return (a, b, c)
+
+-- rework with Either
+
+-- reworking
+-- (0,0) -: landLeft' 10 # Nothing
+-- return (0,0) >>= landLeft' 1 >>= landRight' 1 # Just (1,1)
+-- Nothing >>= landLeft' 2 # `fail` will be propaged.
+landLeft' :: Birds -> Pole -> Either String Pole
+landLeft' n (left, right)
+  | abs ((left + n) - right) < 4 = Right $ landLeft n (left, right)
+  | otherwise = leftMsg (left, right)
+
+landRight' :: Birds -> Pole -> Either String Pole
+landRight' n (left, right)
+  | abs (left - (right + n)) < 4 = Right $ landRight n (left, right)
+  | otherwise = leftMsg (left, right)
+
+leftMsg :: Pole -> Either String Pole
+leftMsg (left, right) = Left $ "Pierre fell off the rope!! birds on the left: " ++ show left ++ ", birds on the right: " ++ show right
+
+banana :: Pole -> Either String Pole
+banana = leftMsg
+
+routine :: Either String Pole
+routine = do
+  let start = (0, 0)
+  first <- landLeft' 2 start
+  second <- landRight' 2 first
+  third <- landLeft' 1 second
+  banana third

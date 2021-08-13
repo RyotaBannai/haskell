@@ -144,3 +144,6 @@
 
 - `Inefficient list construction`:
   - When using the `Writer monad`, you have to be careful which `monoid` to use, because using lists can sometimes turn out to be very slow. That's because lists use `++` for `mappend` and using `++` to `add something to the end of a list` is slow if that list is really long. 
+- Error Monad:
+  - When we use `>>=` to feed a `Left` value to a function, `the function is ignored` and `an identical Left value is returned`
+  
