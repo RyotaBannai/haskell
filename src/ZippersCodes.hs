@@ -105,3 +105,66 @@ goBottom z = goBottom (goForward z)
 goTop :: ListZipper a -> ListZipper a
 goTop (xs, []) = (xs, [])
 goTop z = goTop (goBack z)
+
+-- simple file system
+
+type Name = String
+
+type Data = String
+
+-- file system item
+data FSItem = File Name Data | Folder Name [FSItem] deriving (Show)
+
+myDisk :: FSItem
+myDisk =
+  Folder
+    "root"
+    [ File "goat_yelling_like_man.wmv" "baaaaaa",
+      File "pope_time.avi" "god bless",
+      Folder
+        "pics"
+        [ File "ape_throwing_up.jpg" "bleargh",
+          File "watermelon_smash.gif" "smash!!",
+          File "skull_man(scary).bmp" "Yikes!"
+        ],
+      File "jijon_poupon.doc" "best mustard",
+      Folder
+        "programs"
+        [ File "fartizard.exe" "10gotofart",
+          File "owl_bandit.dmg" "mov eax, h00t",
+          File "not_a_virus.exe" "really not a virus",
+          Folder
+            "source code "
+            [ File "best_hs_prog.hs" "main = print (fix error)",
+              File "random.hs" "main = print 4"
+            ]
+        ]
+    ]
+
+data FSCrumb = FSCrumb Name [FSItem] [FSItem] deriving (Show)
+
+type FSZipper = (FSItem, [FSCrumb])
+
+fsUp :: FSZipper -> FSZipper
+fsUp (item, FSCrumb name ls rs : bs) = (Folder name (ls ++ [item] ++ rs), bs)
+
+{-
+Note that if the name we're looking for isn't in the folder, the pattern item:rs will try to match on an empty list and we'll get an error. Also, if our current focus isn't a folder at all but a file, we get an error as well and the program crashes.
+-}
+fsTo :: Name -> FSZipper -> FSZipper
+fsTo name (Folder folderName items, bs) =
+  let (ls, item : rs) = break (nameIs name) items
+   in (item, FSCrumb folderName ls rs : bs)
+
+-- Auxilliary function
+nameIs :: Name -> FSItem -> Bool
+nameIs name (Folder folderName _) = name == folderName
+nameIs name (File fileName _) = name == fileName
+
+fsRename :: Name -> FSZipper -> FSZipper
+fsRename newName (Folder _ items, bs) = (Folder newName items, bs)
+fsRename newName (File _ dat, bs) = (File newName dat, bs)
+
+-- Note that this would crash if we tried to add an item but weren't focusing on a folder, but were focusing on a file instead.
+fsNewFile :: FSItem -> FSZipper -> FSZipper
+fsNewFile item (Folder folderName items, bs) = (Folder folderName (item : items), bs)
