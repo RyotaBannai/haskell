@@ -64,27 +64,32 @@ type Breadcrumbs a = [Crumb a]
 (-:) :: t1 -> (t1 -> t2) -> t2
 x -: f = f x
 
+-- return (freeTree,[]) >>= goLeft >>= goLeft >>= goLeft >>= goLeft >>= topMost
+
 -- return `focused Tree` and other infomation except the `focused Tree`, which is value of parent Tree and the Tree on opposite side. So we can reconstruct parent Tree again with those infomation.
-goLeft :: Zipper a -> Zipper a
-goLeft (Node x l r, bs) = (l, LeftCrumb x r : bs)
+goLeft :: Zipper a -> Maybe (Zipper a)
+goLeft (Node x l r, bs) = Just (l, LeftCrumb x r : bs)
+goLeft (EmptyTree, _) = Nothing
 
-goRight :: Zipper a -> Zipper a
-goRight (Node x l r, bs) = (r, RightCrumb x l : bs)
+goRight :: Zipper a -> Maybe (Zipper a)
+goRight (Node x l r, bs) = Just (r, RightCrumb x l : bs)
+goRight (EmptyTree, _) = Nothing
 
-goUp :: Zipper a -> Zipper a
-goUp (t, LeftCrumb x r : bs) = (Node x t r, bs)
-goUp (t, RightCrumb x l : bs) = (Node x l t, bs)
+goUp :: Zipper a -> Maybe (Zipper a)
+goUp (t, LeftCrumb x r : bs) = Just (Node x t r, bs)
+goUp (t, RightCrumb x l : bs) = Just (Node x l t, bs)
+goUp (_, []) = Nothing -- at the `root` of the tree
 
-topMost :: Zipper a -> Zipper a
-topMost (t, []) = (t, [])
-topMost z = topMost (goUp z)
+topMost :: Zipper a -> Maybe (Zipper a)
+topMost (t, []) = Just (t, [])
+topMost z = goUp z >>= topMost
 
 modify :: (a -> a) -> Zipper a -> Zipper a
 modify f (Node x l r, bs) = (Node (f x) l r, bs)
 modify f (EmptyTree, bs) = (EmptyTree, bs)
 
--- let farLeft = (freeTree, []) -: goLeft -: goLeft -: goLeft -: goLeft
--- let newFocus = farLeft -: attach (Node 'Z' EmptyTree EmptyTree)
+-- let farLeft = (freeTree, []) >>= goLeft >>= goLeft >>= goLeft >>= goLeft
+-- let newFocus = farLeft >>= attach (Node 'Z' EmptyTree EmptyTree)
 attach :: Tree a -> Zipper a -> Zipper a
 attach t (_, bs) = (t, bs)
 
