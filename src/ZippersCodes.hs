@@ -1,6 +1,6 @@
 module ZippersCodes where
 
-import DataTypeAndTypeclasses (Tree (EmptyTree, Node), treeInsert)
+import DataTypeAndTypeclasses (List' (..), Tree (EmptyTree, Node), treeInsert)
 
 -- There are many different kinds of trees.
 freeTree :: Tree Char
@@ -87,3 +87,21 @@ modify f (EmptyTree, bs) = (EmptyTree, bs)
 -- let newFocus = farLeft -: attach (Node 'Z' EmptyTree EmptyTree)
 attach :: Tree a -> Zipper a -> Zipper a
 attach t (_, bs) = (t, bs)
+
+-- First list is the currently focused list, and second list is the list of breadcrumbs.
+type ListZipper a = ([a], [a])
+
+-- goTop $ goBottom (xs,[])
+goForward :: ListZipper a -> ListZipper a
+goForward (x : xs, bs) = (xs, x : bs)
+
+goBack :: ListZipper a -> ListZipper a
+goBack (xs, b : bs) = (b : xs, bs)
+
+goBottom :: ListZipper a -> ListZipper a
+goBottom ([x], bs) = ([x], bs)
+goBottom z = goBottom (goForward z)
+
+goTop :: ListZipper a -> ListZipper a
+goTop (xs, []) = (xs, [])
+goTop z = goTop (goBack z)
