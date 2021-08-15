@@ -29,6 +29,7 @@ library
   exposed-modules:
     Baby
     DataTypeAndTypeclasses
+    Expr.MonadTrans
     FunctorCodes
     Geometry.Cube
     Geometry.Cuboid
