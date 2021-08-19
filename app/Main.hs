@@ -4,8 +4,8 @@ import Control.Exception
 import Control.Monad
 import Data.Char
 import Data.List
-import FunctorCodes
-import qualified HeathrowToLondon
+import Lyhfgg.FunctorCodes
+import qualified Lyhfgg.HeathrowToLondon
 import System.Directory
 import System.Environment
 import System.IO
@@ -14,7 +14,7 @@ import System.Random
 
 -- main always has a type signate of main :: IO something
 main :: IO ()
-main = FunctorCodes.moreComplex
+main = Lyhfgg.FunctorCodes.moreComplex
 
 main' :: IO ()
 main' = toTry `catch` betterHandler

@@ -1,4 +1,4 @@
-module DataTypeAndTypeclasses
+module Lyhfgg.DataTypeAndTypeclasses
   ( Point (..),
     Shape (..),
     surface,

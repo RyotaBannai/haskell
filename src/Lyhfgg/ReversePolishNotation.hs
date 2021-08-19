@@ -1,4 +1,4 @@
-module ReversePolishNotation where
+module Lyhfgg.ReversePolishNotation where
 
 import Data.List
 import GHC.Float

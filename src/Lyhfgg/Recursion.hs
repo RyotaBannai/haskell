@@ -1,4 +1,4 @@
-module Recursion where
+module Lyhfgg.Recursion where
 
 maximum' :: (Ord a) => [a] -> a
 maximum' [] = error "Maximum of empty list" -- edge condition

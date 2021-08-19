@@ -1,4 +1,4 @@
-module TypesAndTypeclasses where
+module Lyhfgg.TypesAndTypeclasses where
 
 -- type declaration
 removeNonUpperCase :: String -> String

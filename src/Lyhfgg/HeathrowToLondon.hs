@@ -1,4 +1,4 @@
-module HeathrowToLondon where
+module Lyhfgg.HeathrowToLondon where
 
 {-
 $ cat resources/paths.txt | cabal ru

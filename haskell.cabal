@@ -27,27 +27,27 @@ extra-source-files:
 library
   -- cabal-fmt: expand src
   exposed-modules:
-    Baby
-    DataTypeAndTypeclasses
-    Expr.MonadTrans
-    FunctorCodes
-    Geometry.Cube
-    Geometry.Cuboid
-    Geometry.Sphere
-    HeathrowToLondon
-    Hof
-    KnightsQueat
-    Modules
-    MonadCodes
-    MoreMonadCodes
-    MyIOCodes
-    Person
-    Randomness
-    Recursion
-    ReversePolishNotation
-    SyntaxInFunction
-    TypesAndTypeclasses
-    ZippersCodes
+    Lyhfgg.Baby
+    Lyhfgg.DataTypeAndTypeclasses
+    Lyhfgg.Expr.MonadTrans
+    Lyhfgg.FunctorCodes
+    Lyhfgg.Geometry.Cube
+    Lyhfgg.Geometry.Cuboid
+    Lyhfgg.Geometry.Sphere
+    Lyhfgg.HeathrowToLondon
+    Lyhfgg.Hof
+    Lyhfgg.KnightsQueat
+    Lyhfgg.Modules
+    Lyhfgg.MonadCodes
+    Lyhfgg.MoreMonadCodes
+    Lyhfgg.MyIOCodes
+    Lyhfgg.Person
+    Lyhfgg.Randomness
+    Lyhfgg.Recursion
+    Lyhfgg.ReversePolishNotation
+    Lyhfgg.SyntaxInFunction
+    Lyhfgg.TypesAndTypeclasses
+    Lyhfgg.ZippersCodes
 
   -- Modules included in this library but not exported.
   -- other-modules:
