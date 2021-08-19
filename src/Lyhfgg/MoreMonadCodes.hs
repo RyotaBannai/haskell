@@ -6,7 +6,7 @@ import Control.Monad.Except
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.State
 import Control.Monad.Writer
-import Data.List
+import Data.List (foldr)
 import Data.Monoid
 import Data.Ratio
 import Data.Semigroup

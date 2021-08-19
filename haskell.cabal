@@ -27,9 +27,9 @@ extra-source-files:
 library
   -- cabal-fmt: expand src
   exposed-modules:
+    Archive.Expr.MonadTrans
     Lyhfgg.Baby
     Lyhfgg.DataTypeAndTypeclasses
-    Lyhfgg.Expr.MonadTrans
     Lyhfgg.FunctorCodes
     Lyhfgg.Geometry.Cube
     Lyhfgg.Geometry.Cuboid

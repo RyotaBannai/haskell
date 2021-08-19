@@ -1,9 +1,11 @@
-module Lyhfgg.Expr.MonadTrans where
+module Archive.Expr.MonadTrans where
 
 import Control.Applicative
+import Control.Monad
 import Control.Monad.Trans
 import Control.Monad.Trans.Maybe
 import Data.Maybe
+import Data.Text.Internal.Fusion (Stream)
 import System.IO
 
 transMaybeIO :: MaybeT IO (Int -> MaybeT IO Int)
@@ -61,3 +63,43 @@ mgreet = do
 
 re1 :: [Maybe Integer]
 re1 = getZipList $ liftA2 (<*>) (ZipList [Just (* 5), Just (* 4)]) (ZipList [Just 6, Just 6])
+
+-- lift := 普通のモナドを maybeT のようなモナド変換子にラップして返す
+-- list m = MaybeT $ m >>= (\x -> return (Just x))
+
+mt :: IO (Maybe ())
+mt = runMaybeT $ (return 1 :: MaybeT IO Int) >>= lift . print -- print の返り値は unit () なため mt は `Just ()`
+
+mt2 :: IO (Maybe Int)
+mt2 =
+  runMaybeT $
+    (return 1 :: MaybeT IO Int) >>= \x -> do
+      lift (print x) -- 計算途中の変数値を表示することができるが, impure なため避ける.
+      return (x * 2)
+
+type MaybeIO a = MaybeT IO a
+
+-- runMaybeT getWord
+getWord :: MaybeIO String
+getWord = do
+  lift (putStr "Input> ")
+  a <- lift getLine
+  when (a == "") (fail "")
+  return a
+
+test01 :: MaybeIO String
+test01 = do
+  a <- getWord
+  b <- getWord
+  return (a ++ b)
+
+test01' :: IO ()
+test01' = do
+  a <- runMaybeT test01
+  case a of
+    Nothing -> return ()
+    Just s -> do putStrLn s; test01'
+
+-- 2 回まで空入力を受け入れる
+test02 :: MaybeIO String
+test02 = getWord `mplus` getWord `mplus` getWord

@@ -146,4 +146,12 @@
   - When using the `Writer monad`, you have to be careful which `monoid` to use, because using lists can sometimes turn out to be very slow. That's because lists use `++` for `mappend` and using `++` to `add something to the end of a list` is slow if that list is really long. 
 - Error Monad:
   - When we use `>>=` to feed a `Left` value to a function, `the function is ignored` and `an identical Left value is returned`
-  
+- `モナド変換子則（monad transformer law）`:
+  1. `lift . return == return`
+  2. `lift (m >>= k) == lift m >>= (lift . k)`
+-  モナド変換子は MonadPlus のインスタンスに設定しておくと便利なことがあり、この場合、二通りの方法が考えられる:
+  1. モナド変換子 t の元になるモナドの MonadPlus に合わせる方法
+  2. モナド変換子 t の引数に与えられるモナド m の MonadPlus に合わせる方法
+  - `MaybeT m` でいえば、`Maybe` の MonadPlus に従うか、`モナド m` の MonadPlus に従うかということ
+  - 一般に、モナドは`失敗系 (Maybe, Either, List)` と`状態系 (Writer, Reader, State, IO)` の二つに大別することができる
+    - Haskell の標準ライブラリにあるモナド変換子のソースをみると、`失敗系`のモナド変換子の MonadPlus は`元になるモナド`に、`状態系`の場合は`引数として与えられるモナド`にあわせてある. 
