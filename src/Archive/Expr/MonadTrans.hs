@@ -2,6 +2,7 @@ module Archive.Expr.MonadTrans where
 
 import Control.Applicative
 import Control.Monad
+import Control.Monad.Except
 import Control.Monad.Trans
 import Control.Monad.Trans.Maybe
 import Data.Maybe
@@ -77,29 +78,73 @@ mt2 =
       lift (print x) -- 計算途中の変数値を表示することができるが, impure なため避ける.
       return (x * 2)
 
+-- Monad transform with MaybeT
 type MaybeIO a = MaybeT IO a
 
 -- runMaybeT getWord
-getWord :: MaybeIO String
-getWord = do
+getWordM :: MaybeIO String
+getWordM = do
   lift (putStr "Input> ")
   a <- lift getLine
   when (a == "") (fail "")
   return a
 
-test01 :: MaybeIO String
-test01 = do
-  a <- getWord
-  b <- getWord
+testMTM01 :: MaybeIO String
+testMTM01 = do
+  a <- getWordM
+  b <- getWordM
   return (a ++ b)
 
-test01' :: IO ()
-test01' = do
-  a <- runMaybeT test01
+testMTM01' :: IO ()
+testMTM01' = do
+  a <- runMaybeT testMTM01
   case a of
     Nothing -> return ()
-    Just s -> do putStrLn s; test01'
+    Just s -> do putStrLn s; testMTM01'
 
 -- 2 回まで空入力を受け入れる
-test02 :: MaybeIO String
-test02 = getWord `mplus` getWord `mplus` getWord
+testMTM02 :: MaybeIO String
+testMTM02 = getWordM `mplus` getWordM `mplus` getWordM
+
+-- Monad transform with ExceptT
+type ExceptIO a = ExceptT String IO a
+
+-- runExceptT getWordE
+getWordE :: ExceptIO String
+getWordE = do
+  lift (putStr "Input> ")
+  a <- lift getLine
+  when (a == "") (throwError "empty string. ")
+  return a
+
+testMTE01 :: ExceptIO String
+testMTE01 = do
+  a <- getWordE
+  b <- getWordE
+  return (a ++ b)
+
+testMTE01' :: IO ()
+testMTE01' = do
+  a <- runExceptT testMTE01
+  case a of
+    Left s -> putStrLn s
+    Right s -> do putStrLn s; testMTE01'
+
+testMTE02 :: ExceptIO String
+testMTE02 = getWordE `mplus` getWordE `mplus` getWordE
+
+-- catchError from Monad.Except -- print Error message, but still return `Right ""` as true value.
+catched :: IO (Either String String)
+catched = runExceptT $ (throwError "**Exception**: There is something wrong!" :: ExceptIO String) `catchError` \e -> do liftIO (print e); return ""
+
+-- Right 1
+mplusedEMonad :: IO (Either String Int)
+mplusedEMonad = runExceptT $ (return 1 :: ExceptIO Int) `mplus` return 2
+
+-- Left ""
+mplusedEMonad' :: IO (Either String Int)
+mplusedEMonad' = runExceptT $ (mzero :: ExceptT String IO Int) `mplus` mzero
+
+-- Right "ok"
+mplusedEMonad'' :: IO (Either String String)
+mplusedEMonad'' = runExceptT $ (throwError "Error" :: ExceptT String IO String) `mplus` return "ok"
