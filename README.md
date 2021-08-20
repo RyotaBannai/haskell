@@ -155,3 +155,7 @@
   - `MaybeT m` でいえば、`Maybe` の MonadPlus に従うか、`モナド m` の MonadPlus に従うかということ
   - 一般に、モナドは`失敗系 (Maybe, Either, List)` と`状態系 (Writer, Reader, State, IO)` の二つに大別することができる
     - Haskell の標準ライブラリにあるモナド変換子のソースをみると、`失敗系`のモナド変換子の MonadPlus は`元になるモナド`に、`状態系`の場合は`引数として与えられるモナド`にあわせてある. 
+- `写像`: 数学で、二つの集合`A`、`B`があって、`A`の各要素`a`に`B`の一つの要素`b`を対応させる規則`f`を`AからBへの写像`といい、`f：a→b`と書く
+  - `恒等写像`（こうとうしゃぞう、`identity mapping`, `identity function`）、`恒等作用素`（こうとうさようそ、`identity operator`）、`恒等変換`（こうとうへんかん、`identity transformation`）は、その引数として用いたのと同じ値を常にそのまま返すような`写像`である。集合論の言葉で言えば、`恒等写像`は`恒等関係`(`identity relation`)である
+  - モジュール `Control.Monad.Identity` に定義されている `Identity` モナド (`恒等モナド`) を使うと、`モナド変換子`から元のモナドを生成することができる
+

@@ -3,6 +3,7 @@ module Archive.Expr.MonadTrans where
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Except
+import Control.Monad.Identity
 import Control.Monad.Trans
 import Control.Monad.Trans.Maybe
 import Data.Maybe
@@ -148,3 +149,19 @@ mplusedEMonad' = runExceptT $ (mzero :: ExceptT String IO Int) `mplus` mzero
 -- Right "ok"
 mplusedEMonad'' :: IO (Either String String)
 mplusedEMonad'' = runExceptT $ (throwError "Error" :: ExceptT String IO String) `mplus` return "ok"
+
+-- Identity Monad
+type Maybe' a = MaybeT Identity a
+
+runMaybe' :: MaybeT Identity a -> Maybe a
+runMaybe' = runIdentity . runMaybeT
+
+checkMaybeId :: Maybe Integer
+checkMaybeId = runMaybe' $ fmap (* 2) (return 1)
+
+checkMaybeId' :: Maybe Integer
+checkMaybeId' = runMaybe' $ mzero `mplus` return 2
+
+-- Nothing
+checkMaybeId'' :: Maybe Integer
+checkMaybeId'' = runMaybe' $ fail "" >>= \x -> return (x * 2)
