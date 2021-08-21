@@ -39,6 +39,10 @@ luhn w x y z = remain == 0
     zipped = zipWith (\i x -> (if even i then (i, luhnDouble x) else (i, x))) [1 ..] [z, y, x, w]
     remain = (`mod` 10) . sum . firsts $ zipped
 
+-- `evens` starts from index 0, which is even.
+luhn' :: Int -> Int -> Int -> Int -> Bool
+luhn' w x y z = let xs = [z, y, x, w] in ((`mod` 10) . sum $ evens xs ++ (map luhnDouble . odds $ xs)) == 0
+
 -- Caesar cryption
 let2int :: Char -> Int
 let2int c = ord c - ord 'a'
@@ -88,3 +92,38 @@ crack xs = encode (- factor) xs
     factor = head (positions (minimum chitab) chitab)
     chitab = [chisqr (rotate n table') table | n <- [0 .. 25]]
     table' = freqs xs
+
+-- 多重再帰
+-- fib := returns nth fibonacci value, where n > 0
+fib :: (Eq a, Num a, Num p) => a -> p
+fib 0 = 0
+fib 1 = 1
+fib n = fib (n -2) + fib (n -1) -- n >= 2
+
+-- 相互再帰
+even' :: Integral a => a -> Bool
+even' 0 = True
+even' n = odd' (n -1)
+
+odd' :: Integral a => a -> Bool
+odd' 0 = False
+odd' n = even' (n -1)
+
+evens :: [a] -> [a]
+evens [] = []
+evens (x : xs) = x : odds xs
+
+odds :: [a] -> [a]
+odds [] = []
+odds (_ : xs) = evens xs
+
+halve :: [a] -> [[a]]
+halve [] = []
+halve xs = let mid = (`div` 2) . length $ xs in [take mid xs, drop mid xs]
+
+merge :: Ord a => [a] -> [a] -> [a]
+merge xs [] = xs
+merge [] ys = ys
+merge (x : xs) (y : ys)
+  | x <= y = x : merge xs (y : ys)
+  | otherwise = y : merge (x : xs) ys
