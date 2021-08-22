@@ -101,6 +101,10 @@ fib 0 = 0
 fib 1 = 1
 fib n = fib (n -2) + fib (n -1) -- n >= 2
 
+-- with `unfold`
+fib' :: [Integer]
+fib' = [0, 1] ++ unfold (const False) (\[x, y] -> x + y) (\[x, y] -> [y, x + y]) [0, 1]
+
 -- 相互再帰
 even' :: Integral a => a -> Bool
 even' 0 = True
@@ -154,6 +158,9 @@ int2bit :: Int -> [Bit]
 int2bit 0 = []
 int2bit n = n `mod` 2 : int2bit (n `div` 2)
 
+int2bit' :: Int -> [Bit]
+int2bit' = unfold (== 0) (`mod` 2) (`div` 2)
+
 make8 :: [Bit] -> [Bit]
 make8 bits = take 8 (bits ++ repeat 0)
 
@@ -163,6 +170,9 @@ stringTobits = concatMap (make8 . int2bit . ord)
 chop8 :: [Bit] -> [[Bit]]
 chop8 [] = []
 chop8 bits = let (unit, rest) = splitAt 8 bits in unit : chop8 rest
+
+chop8' :: [a] -> [[a]]
+chop8' = unfold null (take 8) (drop 8)
 
 bitsTostring :: [Bit] -> String
 bitsTostring = map (chr . bin2int) . chop8
@@ -212,3 +222,16 @@ winner' :: Ord a => [[a]] -> a
 winner' bs = case rank (rmempty bs) of
   [c] -> c
   (c : cs) -> winner' (elim c bs)
+
+-- p: predicate
+unfold :: (t -> Bool) -> (t -> a) -> (t -> t) -> t -> [a]
+unfold p h t x
+  | p x = []
+  | otherwise = h x : unfold p h t (t x)
+
+map' :: (b -> a) -> [b] -> [a]
+map' f = unfold null (f . head) tail
+
+-- take 10 $ iterate' (*2) 1
+iterate' :: (b -> b) -> b -> [b]
+iterate' f = unfold (const False) f f
