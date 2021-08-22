@@ -136,3 +136,40 @@ msort :: Ord a => [a] -> [a]
 msort [] = []
 msort [x] = [x]
 msort xs = let (left, right) = halve xs in merge (msort left) (msort right)
+
+--
+type Bit = Int
+
+-- iterate := 引数の関数を引数の値に繰り返し適用し、無限リストを生成
+-- bin2int [1,0,1,1] # 13 # 右に進むにつれ重みが 2 倍になる
+bin2int :: [Bit] -> Int
+bin2int bits = let weights = iterate (* 2) 1 in sum [x * b | (x, b) <- zip weights bits]
+
+-- (1*a) + (2*b) + (4*c) + (8*d) を整理　p86
+bin2int' :: [Bit] -> Int
+bin2int' = foldr (\x y -> x + 2 * y) 0
+
+int2bit :: Int -> [Bit]
+int2bit 0 = []
+int2bit n = n `mod` 2 : int2bit (n `div` 2)
+
+make8 :: [Bit] -> [Bit]
+make8 bits = take 8 (bits ++ repeat 0)
+
+stringTobits :: String -> [Bit]
+stringTobits = concatMap (make8 . int2bit . ord)
+
+chop8 :: [Bit] -> [[Bit]]
+chop8 [] = []
+chop8 bits = let (unit, rest) = splitAt 8 bits in unit : chop8 rest
+
+bitsTostring :: [Bit] -> String
+bitsTostring = map (chr . bin2int) . chop8
+
+-- test
+-- transmit "haskell is fun." # "haskell is fun."
+transmit :: String -> String
+transmit = bitsTostring . channel . stringTobits
+
+channel :: [Bit] -> [Bit]
+channel = id
