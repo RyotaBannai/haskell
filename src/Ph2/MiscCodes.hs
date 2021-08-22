@@ -235,3 +235,30 @@ map' f = unfold null (f . head) tail
 -- take 10 $ iterate' (*2) 1
 iterate' :: (b -> b) -> b -> [b]
 iterate' f = unfold (const False) f f
+
+data Nat = Zero | Succ Nat deriving (Show)
+
+-- int2nat 3
+nat2int :: Nat -> Int
+nat2int Zero = 0
+nat2int (Succ n) = 1 + nat2int n
+
+-- nat2int $ Succ (Succ (Succ Zero))
+int2nat :: Int -> Nat
+int2nat 0 = Zero
+int2nat n = Succ (int2nat (n -1))
+
+-- addNat (Succ (Succ Zero)) (Succ (Succ Zero))
+addNat :: Nat -> Nat -> Nat
+addNat n m = int2nat (nat2int n + nat2int m)
+
+addNat' :: Nat -> Nat -> Nat
+addNat' Zero n = n
+addNat' (Succ m) n = Succ (addNat' m n) -- Succ m := Succ の中身を取り出す.
+
+{-
+addNat' (Succ (Succ Zero)) (Succ Zero)
+Succ (addNat' (Succ Zero) (Succ Zero))
+Succ (Succ (addNat' Zero (Succ Zero)))
+Succ (Succ (Succ Zero))
+-}
