@@ -65,8 +65,11 @@ lowers xs = length [x | x <- xs, isAsciiLower x]
 count :: Eq a => a -> [a] -> Int
 count x xs = length [x' | x' <- xs, x == x']
 
-find :: Eq a1 => a1 -> [(a1, a2)] -> [a2]
+find :: Eq k => k -> Assoc k v -> [v]
 find k t = [v | (k', v) <- t, k == k']
+
+findFirst :: Eq k => k -> Assoc k v -> v
+findFirst k t = head $ find k t
 
 positions :: (Num a1, Enum a1, Eq a2) => a2 -> [a2] -> [a1]
 positions x xs = find x (zip xs [0 ..])
@@ -262,3 +265,43 @@ Succ (addNat' (Succ Zero) (Succ Zero))
 Succ (Succ (addNat' Zero (Succ Zero)))
 Succ (Succ (Succ Zero))
 -}
+
+-- Tautology(恒真式) := always returns True
+-- 命題が恒真式であるかを判断する関数を定義する第一歩は、命題を表す型 Prop の宣言である.
+-- 命題を構成する五種類の要素について、それぞれ構成子を定義する:
+data Prop
+  = Const Bool
+  | Var Char
+  | Not Prop -- ¬
+  | And Prop Prop -- ∧
+  | Imply Prop Prop -- ⇒
+
+-- A ∧ ¬A
+p1 :: Prop
+p1 = And (Var 'A') (Not (Var 'A'))
+
+-- (A ∧ B) ⇒ A
+p2 :: Prop
+p2 = Imply (And (Var 'A') (Var 'B')) (Var 'A')
+
+-- A ⇒ (A ∧ B)
+p3 :: Prop
+p3 = Imply (Var 'A') (And (Var 'A') (Var 'B'))
+
+-- (A ∧ (A ⇒ B)) ⇒ B
+p4 :: Prop
+p4 = Imply (And (Var 'A') (Imply (Var 'A') (Var 'B'))) (Var 'B')
+
+type Assoc k v = [(k, v)]
+
+-- 置換表 := 変数名 <-> 真理値
+type Subst = Assoc Char Bool
+
+-- [('A', False), ('B', True)]
+
+eval :: Subst -> Prop -> Bool
+eval _ (Const b) = b
+eval s (Var x) = findFirst x s
+eval s (Not p) = not (eval s p)
+eval s (And p q) = eval s p && eval s q
+eval s (Imply p q) = eval s p <= eval s q
