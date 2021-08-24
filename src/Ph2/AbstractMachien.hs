@@ -33,3 +33,8 @@ exec :: Cont -> Int -> Int
 exec [] n = n
 exec (EVAL y : c) n = eval y (ADD n : c)
 exec (ADD n : c) m = exec c (n + m)
+
+-- folde id (+) (Add (Add (Val 2) (Val 3)) (Val 4)) # 9
+folde :: (Int -> a) -> (a -> a -> a) -> Expr -> a
+folde f g (Val n) = f n
+folde f g (Add n m) = g (folde f g n) (folde f g m)
