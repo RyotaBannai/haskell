@@ -38,3 +38,9 @@ exec (ADD n : c) m = exec c (n + m)
 folde :: (Int -> a) -> (a -> a -> a) -> Expr -> a
 folde f g (Val n) = f n
 folde f g (Add n m) = g (folde f g n) (folde f g m)
+
+folde' :: (Int -> a) -> (a -> a -> a) -> Expr -> a
+folde' f g = go
+  where
+    go (Val n) = f n
+    go (Add n m) = g (go n) (go m)
