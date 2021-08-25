@@ -275,7 +275,9 @@ data Prop
   | Var Char
   | Not Prop -- ¬
   | And Prop Prop -- ∧
+  | Xor Prop Prop --  ⊻ or ⊕ (Unicode: U+2295)
   | Imply Prop Prop -- ⇒
+  | Iff Prop Prop -- ⇔
 
 -- A ∧ ¬A
 p1 :: Prop
@@ -293,6 +295,20 @@ p3 = Imply (Var 'A') (And (Var 'A') (Var 'B'))
 p4 :: Prop
 p4 = Imply (And (Var 'A') (Imply (Var 'A') (Var 'B'))) (Var 'B')
 
+-- 同値 - 反対称律
+-- ((A ⇒ B) ∧ (B ⇒ A)) ⇒ (A ⇔ B)
+p5 :: Prop
+p5 = Imply (And (Imply (Var 'A') (Var 'B')) (Imply (Var 'B') (Var 'A'))) (Iff (Var 'A') (Var 'B'))
+
+-- 同値 - 推移律
+-- ((A ⇔ B) ∧ (B ⇔ C)) ⇒ (A ⇔ C)
+p6 :: Prop
+p6 = Imply (And (Iff (Var 'A') (Var 'B')) (Iff (Var 'B') (Var 'C'))) (Iff (Var 'A') (Var 'C'))
+
+-- (A ⇔ B) ⇔ ¬(A ⊻ B)
+p7 :: Prop
+p7 = Iff (Iff (Var 'A') (Var 'B')) (Not (Xor (Var 'A') (Var 'B')))
+
 type Assoc k v = [(k, v)]
 
 -- 置換表 := 変数名 <-> 真理値
@@ -307,7 +323,9 @@ eval _ (Const b) = b
 eval s (Var x) = findFirst x s -- converts to pure Bool value here.
 eval s (Not p) = not (eval s p)
 eval s (And p q) = eval s p && eval s q
+eval s (Xor p q) = eval s p /= eval s q -- 排他的論理和
 eval s (Imply p q) = eval s p <= eval s q -- 論理包含 p 102 の真理値表を確認.
+eval s (Iff p q) = eval s p == eval s q -- 同値
 
 -- 命題にある全ての変数をリストとして返す関数を定義(Prop を連続的に分割し String として返却する)
 -- i.g. vars p2 = ['A', 'B', 'A'] or "ABA"
@@ -316,7 +334,9 @@ vars (Const _) = []
 vars (Var x) = [x]
 vars (Not p) = vars p
 vars (And p q) = vars p ++ vars q
+vars (Xor p q) = vars p ++ vars q
 vars (Imply p q) = vars p ++ vars q
+vars (Iff p q) = vars p ++ vars q
 
 -- *** bools := n 数の Bool の全く見合わせを生成. i.g. n=3 の場合 8 通りの False/True の組み合わせを作成. ***
 
