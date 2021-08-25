@@ -18,6 +18,7 @@ value' (Val n) = n
 value' (Add x y) = value x + value y
 
 -- value' := 式を評価して整数にする関数. 与えられた式と空の制御スタックを引数に指定して eval を実行.
+-- value (Add (Add (Val 2) (Val 3)) (Val 4)) # 9
 value :: Expr -> Int
 value e = eval e []
 
@@ -44,3 +45,13 @@ folde' f g = go
   where
     go (Val n) = f n
     go (Add n m) = g (go n) (go m)
+
+-- eval' (Add (Add (Val 2) (Val 3)) (Val 4)) # 9
+eval' :: Expr -> Int
+eval' = folde id (+)
+
+-- *** size := 式の中に整数がいくつあるか数える ***
+
+-- size (Add (Add (Val 2) (Val 3)) (Val 4)) # 3
+size :: Expr -> Integer
+size = folde (const 1) (+)
