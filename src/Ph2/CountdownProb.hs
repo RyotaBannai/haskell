@@ -48,3 +48,39 @@ values (App _ l r) = values l ++ values r
 eval :: Expr -> [Int]
 eval (Val n) = [n | n > 0]
 eval (App o l r) = [apply o x y | x <- eval l, y <- eval r, valid o x y]
+
+-- subs [1,2] # [[],[2],[1],[1,2]]
+-- subs [1,2,3] # [[],[3],[2],[2,3],[1],[1,3],[1,2],[1,2,3]] -- 一番後ろの数値が先に base pattern に到達するため先にくる.
+subs :: [a] -> [[a]]
+subs [] = [[]]
+subs (x : xs) = let yss = subs xs in yss ++ map (x :) yss
+
+-- interleave 1 [2,3,4] # [[1,2,3,4],[2,1,3,4],[2,3,1,4],[2,3,4,1]]
+interleave :: a -> [a] -> [[a]]
+interleave x [] = [[x]]
+interleave x (y : ys) = (x : y : ys) : map (y :) (interleave x ys)
+
+{-
+1 [2,3,4] = [1,2,3,4] : map (2:) (?) # <- ? := [[1,3,4],[3,1,4],[3,4,1]] -> [[1,2,3,4],[2,1,3,4],[2,3,1,4],[2,3,4,1]]
+1 [3,4]   = [1,3,4]   : map (3:) (?) # <- ? := [[1,4],[4,1]]             -> [[1,3,4],[3,1,4],[3,4,1]]
+1 [4]     = [1,4]     : map (4:) (?) # <- ? := [[1]]                     -> [[1,4],[4,1]]
+1 []      = [[1]]
+-}
+
+perms :: [a] -> [[a]]
+-- perms [] = [[]]
+-- perms (x : xs) = concatMap (interleave x) (perms xs)
+perms = foldr (concatMap . interleave) [[]]
+
+{-
+1:[2,3] = concatMap (interleave 1) ([[2,3],[3,2]]) -- [[[1,2,3],[2,1,3],[2,3,1]],[[1,3,2],[3,1,2],[3,2,1]]] -> concatenated [[1,2,3],[2,1,3],[2,3,1],[1,3,2],[3,1,2],[3,2,1]]
+2:[3] = concatMap (interleave 2) ([[3]])     -- [[[2,3],[3,2]]] -> concatenated [[2,3],[3,2]]
+3:[] = concatMap (interleave 3) ([[]])       -- [[[3]]]         -> concatenated [[3]]
+[] = [[]]
+-}
+
+-- *** choices := produces all possible patterns from given set, including all subsets and ordering differences. ***
+
+-- chocies [1,2,3] # [[],[3],[2],[2,3],[3,2],[1],[1,3],[3,1],[1,2],[2,1],[1,2,3],[2,1,3],[2,3,1],[1,3,2],[3,1,2],[3,2,1]]
+choices :: [a] -> [[a]]
+choices = concatMap perms . subs
