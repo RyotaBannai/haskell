@@ -1,5 +1,7 @@
 module Ph2.CountdownProb where
 
+-- remove module declaration when compile `ghc CountdownProb.hs`
+
 -- These ops are valid as long as the result is positive integer.
 data Op = Add | Sub | Mul | Div
 
@@ -84,3 +86,45 @@ perms = foldr (concatMap . interleave) [[]]
 -- chocies [1,2,3] # [[],[3],[2],[2,3],[3,2],[1],[1,3],[3,1],[1,2],[2,1],[1,2,3],[2,1,3],[2,3,1],[1,3,2],[3,1,2],[3,2,1]]
 choices :: [a] -> [[a]]
 choices = concatMap perms . subs
+
+-- *** colusion := checks if the given expression result in the given result ***
+
+-- e = App Mul (App Add(Val 1) (Val 50)) (App Sub(Val 25) (Val 10))
+-- solution e [1,3,7,10,25,50] 765 # True
+solution :: Expr -> [Int] -> Int -> Bool
+solution e ns n = elem (values e) (choices ns) && eval e == [n]
+
+-- *** split := あるリストを空でない２つのリストに分割 ***
+
+-- split [1..4] # [([1], [2, 3, 4]), ([1, 2], [3, 4]), ([1, 2, 3], [4])]
+split :: [a] -> [([a], [a])]
+split [] = [] -- return null when nulls
+split [_] = [] -- base
+split (x : xs) = ([x], xs) : [(x : ls, rs) | (ls, rs) <- split xs] -- recursive logic
+{-
+split [1..4]
+split 1: [2,3,4] = ([1],[2,3,4]) : [(1:ls,rs) <- (ls,rs) <- split [2,3,4]]  # returns [([1],[2,3,4]),([1,2],[3,4]),([1,2,3],[4])]
+split 2: [3,4] = ([2],[3,4]) : [(2:ls,rs) <- (ls,rs) <- split [3,4]]        # returns [([2],[3,4]),([2,3],[4])]
+split 3: [4] = ([3],[4]) : [(3:ls,rs) <- (ls,rs) <- split [4]]              # returns [([3],[4])]
+split [4] = []                                                              # returns []
+-}
+
+-- *** exprs := generates all possible combinations with numbers and opeartions. ***
+
+exprs :: [Int] -> [Expr]
+exprs [] = []
+exprs [n] = [Val n]
+exprs ns = [e | (ls, rs) <- split ns, l <- exprs ls, r <- exprs rs, e <- combine l r]
+
+combine :: Expr -> Expr -> [Expr]
+combine l r = [App o l r | o <- ops]
+
+ops :: [Op]
+ops = [Add, Sub, Mul, Div]
+
+solutions :: [Int] -> Int -> [Expr]
+solutions ns n = [e | ns' <- choices ns, e <- exprs ns', eval e == [n]]
+
+-- Add when compile as a single file
+-- main :: IO ()
+-- main = print (solutions [1, 3, 7, 10, 25, 50] 765)
