@@ -134,10 +134,30 @@ results [n] = [(Val n, n) | n > 0]
 results ns = [res | (ls, rs) <- split ns, l <- results ls, r <- results rs, res <- combine' l r]
 
 combine' :: Result -> Result -> [Result]
-combine' (l, x) (r, y) = [(App o l r, apply o x y) | o <- ops, valid o x y] -- 式の生成と式の評価を同時に実行
+combine' (l, x) (r, y) = [(App o l r, apply o x y) | o <- ops, valid' o x y] -- 式の生成と式の評価を同時に実行
 
 solutions' :: [Int] -> Int -> [Expr]
 solutions' ns n = [e | ns' <- choices ns, (e, m) <- results ns', m == n]
+
+-- *** 代数的な性質を生かす ***
+
+{-
+Apply these axioms:
+・可換則
+・単位元の性質
+
+x+y = y+x
+x*y = y*x
+x*1 = x
+1*y = y
+x/1 = x
+
+-}
+valid' :: Op -> Int -> Int -> Bool
+valid' Add x y = x <= y
+valid' Sub x y = x > y
+valid' Mul x y = x /= 1 && y /= 1 && x <= y
+valid' Div x y = y /= 1 && x `mod` y == 0
 
 -- Add when compile as a single file
 -- main :: IO ()
