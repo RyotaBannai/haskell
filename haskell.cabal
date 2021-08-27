@@ -50,6 +50,7 @@ library
     Lyhfgg.ZippersCodes
     Ph2.AbstractMachien
     Ph2.CountdownProb
+    Ph2.Hangman
     Ph2.MiscCodes
 
   -- Modules included in this library but not exported.
