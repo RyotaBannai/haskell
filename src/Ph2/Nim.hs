@@ -53,3 +53,28 @@ getDigit prompt = do
 
 newline :: IO ()
 newline = putChar '\n'
+
+-- localize and minimize side effects in the few functions and extracts as much helper functions as possible out of it.
+play :: Board -> Int -> IO ()
+play board player =
+  do
+    newline
+    putBoard board
+    if finished board
+      then do
+        newline
+        putStr "Player "
+        putStr (show (next player))
+        putStrLn " wins!!"
+      else do
+        newline
+        putStr "Player "
+        print player
+        row <- getDigit "Enter a row number: "
+        num <- getDigit "Stars to remove: "
+        if valid board row num
+          then play (move board row num) (next player)
+          else do
+            newline
+            putStrLn "Error: Invalid move"
+            play board player -- fp is immutable, therefore pass state on the next call.
