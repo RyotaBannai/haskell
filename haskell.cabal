@@ -49,6 +49,7 @@ library
     Lyhfgg.TypesAndTypeclasses
     Lyhfgg.ZippersCodes
     Ph2.AbstractMachien
+    Ph2.Common
     Ph2.CountdownProb
     Ph2.Hangman
     Ph2.Life

@@ -1,6 +1,7 @@
 module Ph2.Nim where
 
 import Data.Char (digitToInt, isDigit)
+import Ph2.Common (newline)
 
 -- returns next player (in number)
 next :: Int -> Int
@@ -40,6 +41,9 @@ putBoard [a, b, c, d, e] =
     putRow 4 d
     putRow 5 e
 
+putBoard' :: Board -> IO ()
+putBoard' xs = sequence_ [putRow n x | (n, x) <- zip [1 ..] xs]
+
 getDigit :: String -> IO Int
 getDigit prompt = do
   putStr prompt
@@ -50,9 +54,6 @@ getDigit prompt = do
     else do
       putStrLn "ERROR: Invalid digit"
       getDigit prompt
-
-newline :: IO ()
-newline = putChar '\n'
 
 -- localize and minimize side effects in the few functions and extracts as much helper functions as possible out of it.
 play :: Board -> Int -> IO ()

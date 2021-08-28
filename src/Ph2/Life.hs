@@ -1,6 +1,7 @@
 module Ph2.Life where
 
-import Data.List as List
+import Data.List (nub)
+import Ph2.Common (newline)
 
 -- *** 左上 (1,1)を原点とする
 
@@ -49,9 +50,6 @@ showcells b =
 showcells' :: [Pos] -> IO ()
 showcells' b = sequence_ [writeat p "0" | p <- b]
 
-newline :: IO ()
-newline = putChar '\n'
-
 isAlive :: Board -> Pos -> Bool
 isAlive b p = p `elem` b
 
@@ -90,7 +88,7 @@ survivors b = [p | p <- b, liveneighbs b p `elem` [2, 3]]
 births :: Board -> [Pos]
 births b =
   [ p
-    | p <- List.nub $ concatMap neighbs b,
+    | p <- nub $ concatMap neighbs b,
       isDead b p,
       liveneighbs b p == 3
   ]

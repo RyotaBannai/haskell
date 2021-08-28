@@ -1,6 +1,6 @@
 module Ph2.Hangman where
 
-import System.IO (hSetEcho, stdin)
+import Ph2.Common (getCh)
 
 -- hang man
 hangman :: IO ()
@@ -22,13 +22,6 @@ sgetLine = do
       putChar '-'
       xs <- sgetLine
       return (x : xs) -- `xs` can be null
-
-getCh :: IO Char
-getCh = do
-  hSetEcho stdin False -- echo back 機能を False (入力した文字を repl に表示しない).
-  x <- getChar
-  hSetEcho stdin True
-  return x
 
 -- 二人目の player に推測を入力させ、それを秘密の単語と一致するまで繰り返すというゲームのメインループを実現させる.
 play :: String -> IO ()
