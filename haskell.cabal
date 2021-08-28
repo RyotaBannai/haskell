@@ -51,6 +51,7 @@ library
     Ph2.AbstractMachien
     Ph2.CountdownProb
     Ph2.Hangman
+    Ph2.Life
     Ph2.MiscCodes
     Ph2.Nim
 
