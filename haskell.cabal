@@ -52,6 +52,7 @@ library
     Ph2.CountdownProb
     Ph2.Hangman
     Ph2.MiscCodes
+    Ph2.Nim
 
   -- Modules included in this library but not exported.
   -- other-modules:
