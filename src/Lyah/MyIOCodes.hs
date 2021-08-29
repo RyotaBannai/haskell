@@ -1,4 +1,4 @@
-module Lyhfgg.MyIOCodes where
+module Lyah.MyIOCodes where
 
 import Control.Monad
 import Data.Char

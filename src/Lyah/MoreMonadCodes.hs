@@ -1,4 +1,4 @@
-module Lyhfgg.MoreMonadCodes where
+module Lyah.MoreMonadCodes where
 
 import Control.Applicative
 import Control.Monad
@@ -11,8 +11,8 @@ import Data.Monoid
 import Data.Ratio
 import Data.Semigroup
 import GHC.Base
-import Lyhfgg.KnightsQueat (KnightPos, moveKnight)
-import Lyhfgg.MonadCodes (Birds, Pole (..), landLeft, landRight)
+import Lyah.KnightsQueat (KnightPos, moveKnight)
+import Lyah.MonadCodes (Birds, Pole (..), landLeft, landRight)
 import System.Random
 
 isBigBang :: (Ord a, Num a) => a -> (Bool, String)

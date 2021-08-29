@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Ph2.Common where
+module Pih.Common where
 
 import Control.Monad (filterM, forM_, guard, unless, void)
 import Control.Monad.ListM (spanM, takeWhileM)

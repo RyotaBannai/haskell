@@ -1,4 +1,4 @@
-module Lyhfgg.Randomness where
+module Lyah.Randomness where
 
 import qualified Data.ByteString.Lazy as ByteString
 import qualified Data.Text.Encoding as Text

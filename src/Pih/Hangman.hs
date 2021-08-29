@@ -1,6 +1,6 @@
-module Ph2.Hangman where
+module Pih.Hangman where
 
-import Ph2.Common (getCh)
+import Pih.Common (getCh)
 
 -- hang man
 hangman :: IO ()

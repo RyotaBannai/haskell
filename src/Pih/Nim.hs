@@ -1,7 +1,7 @@
-module Ph2.Nim where
+module Pih.Nim where
 
 import Data.Char (digitToInt, isDigit)
-import Ph2.Common (newline)
+import Pih.Common (newline)
 
 -- returns next player (in number)
 next :: Int -> Int

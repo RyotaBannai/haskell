@@ -1,10 +1,10 @@
-module Lyhfgg.Geometry.Cube
+module Lyah.Geometry.Cube
   ( cubeVolume,
     cubeArea,
   )
 where
 
-import Lyhfgg.Geometry.Cuboid (cuboidArea)
+import Lyah.Geometry.Cuboid (cuboidArea)
 
 cubeVolume :: Float -> Float
 cubeVolume side = cuboidArea side side side

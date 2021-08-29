@@ -1,4 +1,4 @@
-module Ph2.MiscCodes where
+module Pih.MiscCodes where
 
 import Data.Char
 import qualified Data.List as List

@@ -1,6 +1,6 @@
-module Lyhfgg.ZippersCodes where
+module Lyah.ZippersCodes where
 
-import Lyhfgg.DataTypeAndTypeclasses (List' (..), Tree (EmptyTree, Node), treeInsert)
+import Lyah.DataTypeAndTypeclasses (List' (..), Tree (EmptyTree, Node), treeInsert)
 
 -- There are many different kinds of trees.
 freeTree :: Tree Char

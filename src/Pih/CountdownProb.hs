@@ -1,4 +1,4 @@
-module Ph2.CountdownProb where
+module Pih.CountdownProb where
 
 -- remove module declaration when compile `ghc CountdownProb.hs`
 

@@ -1,7 +1,7 @@
-module Ph2.Life where
+module Pih.Life where
 
 import Data.List (nub)
-import Ph2.Common (newline)
+import Pih.Common (newline)
 
 -- *** 左上 (1,1)を原点とする
 

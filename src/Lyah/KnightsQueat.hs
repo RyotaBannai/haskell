@@ -1,4 +1,4 @@
-module Lyhfgg.KnightsQueat where
+module Lyah.KnightsQueat where
 
 import Control.Arrow (Arrow (first))
 import Control.Monad

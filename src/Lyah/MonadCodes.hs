@@ -1,4 +1,4 @@
-module Lyhfgg.MonadCodes where
+module Lyah.MonadCodes where
 
 import Control.Monad
 

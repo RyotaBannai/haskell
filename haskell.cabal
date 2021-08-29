@@ -28,34 +28,34 @@ library
   -- cabal-fmt: expand src
   exposed-modules:
     Archive.Expr.MonadTrans
-    Lyhfgg.Baby
-    Lyhfgg.DataTypeAndTypeclasses
-    Lyhfgg.FunctorCodes
-    Lyhfgg.Geometry.Cube
-    Lyhfgg.Geometry.Cuboid
-    Lyhfgg.Geometry.Sphere
-    Lyhfgg.HeathrowToLondon
-    Lyhfgg.Hof
-    Lyhfgg.KnightsQueat
-    Lyhfgg.Modules
-    Lyhfgg.MonadCodes
-    Lyhfgg.MoreMonadCodes
-    Lyhfgg.MyIOCodes
-    Lyhfgg.Person
-    Lyhfgg.Randomness
-    Lyhfgg.Recursion
-    Lyhfgg.ReversePolishNotation
-    Lyhfgg.SyntaxInFunction
-    Lyhfgg.TypesAndTypeclasses
-    Lyhfgg.ZippersCodes
-    Ph2.AbstractMachien
-    Ph2.Common
-    Ph2.CountdownProb
-    Ph2.Hangman
-    Ph2.Life
-    Ph2.MiscCodes
-    Ph2.Nim
-    Ph2.Tictactoe
+    Lyah.Baby
+    Lyah.DataTypeAndTypeclasses
+    Lyah.FunctorCodes
+    Lyah.Geometry.Cube
+    Lyah.Geometry.Cuboid
+    Lyah.Geometry.Sphere
+    Lyah.HeathrowToLondon
+    Lyah.Hof
+    Lyah.KnightsQueat
+    Lyah.Modules
+    Lyah.MonadCodes
+    Lyah.MoreMonadCodes
+    Lyah.MyIOCodes
+    Lyah.Person
+    Lyah.Randomness
+    Lyah.Recursion
+    Lyah.ReversePolishNotation
+    Lyah.SyntaxInFunction
+    Lyah.TypesAndTypeclasses
+    Lyah.ZippersCodes
+    Pih.AbstractMachien
+    Pih.Common
+    Pih.CountdownProb
+    Pih.Hangman
+    Pih.Life
+    Pih.MiscCodes
+    Pih.Nim
+    Pih.Tictactoe
 
   -- Modules included in this library but not exported.
   -- other-modules:

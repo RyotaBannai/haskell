@@ -1,11 +1,11 @@
-module Lyhfgg.FunctorCodes where
+module Lyah.FunctorCodes where
 
 import Control.Applicative
 import Data.Char
 import qualified Data.Foldable as F
 import Data.List
 import Data.Monoid
-import Lyhfgg.DataTypeAndTypeclasses (Tree (EmptyTree, Node), treeInsert)
+import Lyah.DataTypeAndTypeclasses (Tree (EmptyTree, Node), treeInsert)
 
 -- reverse text
 simple :: IO ()

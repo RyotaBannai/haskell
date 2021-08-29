@@ -1,4 +1,4 @@
-module Lyhfgg.SyntaxInFunction where
+module Lyah.SyntaxInFunction where
 
 -- Pattern match (pattern matching on function parameters)
 -- Pattern matching in function definitions is syntactic sugar for case expressions

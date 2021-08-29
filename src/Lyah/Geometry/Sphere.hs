@@ -1,4 +1,4 @@
-module Lyhfgg.Geometry.Sphere
+module Lyah.Geometry.Sphere
   ( sphereVolume,
     sphereArea,
   )

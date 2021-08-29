@@ -1,4 +1,4 @@
-module Ph2.AbstractMachien where
+module Pih.AbstractMachien where
 
 -- *** Abstract machine ***
 

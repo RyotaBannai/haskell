@@ -1,4 +1,4 @@
-module Lyhfgg.Modules where
+module Lyah.Modules where
 
 import Data.Char
 import Data.Function

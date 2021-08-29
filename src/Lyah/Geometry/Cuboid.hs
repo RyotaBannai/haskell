@@ -1,4 +1,4 @@
-module Lyhfgg.Geometry.Cuboid
+module Lyah.Geometry.Cuboid
   ( cuboidArea,
     cuboidVolume,
   )
