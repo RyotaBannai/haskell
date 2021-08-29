@@ -2,7 +2,8 @@
 
 module Ph2.Common where
 
-import Control.Monad
+import Control.Monad.ListM
+import Data.Char (toUpper)
 import System.IO (hSetEcho, stdin)
 
 newline :: IO ()
@@ -43,17 +44,16 @@ readLineCore' = do
   if x == '\n'
     then return []
     else do
-      if x == '\DEL'
-        then putStr "\b \b"
-        else putChar x
+      putOrDel x
       xs <- readLineCore'
       return $ delete (x : xs)
-
-delete :: String -> String
-delete [] = []
-delete ('\DEL' : xs) = '\DEL' : xs
-delete (_ : '\DEL' : xs) = xs
-delete xs = xs
+  where
+    putOrDel x
+      | x == '\DEL' = putStr "\b \b"
+      | otherwise = putChar x
+    delete (x : '\DEL' : xs)
+      | x /= '\DEL' = xs
+    delete xs = xs
 
 -- the same as prelude function `getLine`
 getLine' :: IO String
@@ -75,3 +75,30 @@ fizzbuzz = do
         | n' `mod` 5 == 0 -> "Buzz"
         | n' `mod` 3 == 0 -> "Fizz"
         | otherwise -> show n'
+
+-- p :: [IO Int] -> IO Bool
+-- p as = do
+--   taken <- takeWhileM (>>= return . (<= 0)) as
+--   return (length taken >= length as - 1)
+
+-- process [pure 1, pure 3]
+process :: [IO Int] -> IO [Int]
+process [] = return []
+process xs = sequence xs
+
+sample :: IO [Char]
+sample = fmap (map toUpper) getLine -- liftM
+
+{-
+mapM f is equivalent to sequence . map f.
+
+sequenceA :: forall (t :: * -> *) (f :: * -> *) a.
+(Traversable t, Applicative f) =>
+t (f a) -> f (t a)
+
+sequence :: forall (t :: * -> *) (m :: * -> *) a.
+(Traversable t, Monad m) =>
+t (m a) -> m (t a)
+
+sequence_ := 返される値に関心がない場合
+-}
