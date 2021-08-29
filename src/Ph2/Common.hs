@@ -15,23 +15,44 @@ getCh = do
   return x
 
 readLine :: IO String
-readLine = readLine' ""
+readLine = readLineCore ""
 
-readLine' :: String -> IO String
-readLine' xs = do
+readLineCore :: String -> IO String
+readLineCore xs = do
   x <- getCh
   case x of
     '\n' -> return xs
     '\DEL' ->
       if null xs
-        then readLine' ""
+        then readLineCore ""
         else do
           -- putChar '\b'
           putStr "\b \b"
-          readLine' $ init xs
+          readLineCore $ init xs
     _ -> do
       putChar x
-      readLine' (xs ++ [x])
+      readLineCore (xs ++ [x])
+
+readLine' :: IO String
+readLine' = readLineCore'
+
+readLineCore' :: IO String
+readLineCore' = do
+  x <- getChar
+  if x == '\n'
+    then return []
+    else do
+      xs <- readLineCore'
+      if x == '\DEL'
+        then putStr "\b \b"
+        else pure ()
+      return $ delete (x : xs)
+
+delete :: [Char] -> [Char]
+delete [] = []
+delete ('\DEL' : '\DEL' : xs) = '\DEL' : '\DEL' : xs
+delete (_ : '\DEL' : xs) = xs
+delete xs = xs
 
 -- the same as prelude function `getLine`
 getLine' :: IO String

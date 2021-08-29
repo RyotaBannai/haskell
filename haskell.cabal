@@ -55,6 +55,7 @@ library
     Ph2.Life
     Ph2.MiscCodes
     Ph2.Nim
+    Ph2.Tictactoe
 
   -- Modules included in this library but not exported.
   -- other-modules:
