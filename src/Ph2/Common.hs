@@ -2,6 +2,7 @@
 
 module Ph2.Common where
 
+import Control.Monad
 import System.IO (hSetEcho, stdin)
 
 newline :: IO ()
@@ -34,23 +35,23 @@ readLineCore xs = do
       readLineCore (xs ++ [x])
 
 readLine' :: IO String
-readLine' = readLineCore'
+readLine' = dropWhile (== '\DEL') <$> readLineCore'
 
 readLineCore' :: IO String
 readLineCore' = do
-  x <- getChar
+  x <- getCh
   if x == '\n'
     then return []
     else do
-      xs <- readLineCore'
       if x == '\DEL'
         then putStr "\b \b"
-        else pure ()
+        else putChar x
+      xs <- readLineCore'
       return $ delete (x : xs)
 
-delete :: [Char] -> [Char]
+delete :: String -> String
 delete [] = []
-delete ('\DEL' : '\DEL' : xs) = '\DEL' : '\DEL' : xs
+delete ('\DEL' : xs) = '\DEL' : xs
 delete (_ : '\DEL' : xs) = xs
 delete xs = xs
 
