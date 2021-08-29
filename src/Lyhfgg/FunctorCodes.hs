@@ -65,13 +65,17 @@ sampleZipList = getZipList $ (*) <$> ZipList [1, 2, 3] <*> ZipList [1, 5, 10]
 sampleZipList' :: [(Char, Char, Char)]
 sampleZipList' = getZipList $ (,,) <$> ZipList "dog" <*> ZipList "cat" <*> ZipList "rat"
 
--- liftA2 := takes two functors and a fucntion, and applys the function on the two functors, and return the result of functor.
+-- liftA2 := takes two functors and a function, and applys the function on the two functors, and return the result of functor.
 -- Takes `a list of Functors` and return `a Functor of a list`
 sequenceA :: (Applicative f) => [f a] -> f [a]
 sequenceA = foldr (liftA2 (:)) (pure [])
 
 -- Or
--- sequenceA = foldr (\x -> (<*>) ((:) <$> x)) (pure [])
+-- (\x -> (<*>) ((:) <$> x)) :: Applicative f => f a -> f [a] -> f [a]
+-- <*> :: forall (f :: * -> *) a b. Applicative f => f (a -> b) -> f a -> f b
+-- lambda 部分で <*> の第一引数 f(a->b) を構築した <*> を返却し、accum をその第二引数 f a として適用
+sequenceA' :: (Applicative f) => [f a] -> f [a]
+sequenceA' = foldr (\x -> (<*>) ((:) <$> x)) (pure [])
 
 {-
 sequenceA [[1,2],[3,4]]
@@ -80,9 +84,11 @@ sequenceA [[1,2],[3,4]]
 >> [1:[3],1:[4],2:[3],3:[4]]
 >> [[1,3],[1,4],[2,3],[2,4]]
 -}
+
 -- Easier version to understand the codes
--- sequenceA [] = pure []
--- sequenceA (x : xs) = (:) <$> x <*> sequenceA xs
+-- sequenceA'' :: Applicative f => [f a] -> f [a]
+-- sequenceA'' [] = pure []
+-- sequenceA'' (x : xs) = (:) <$> x <*> sequenceA'' xs -- 右結合で計算した結果, f [a] になり最終的に `(:) <$> x <*> f [a]` の計算に適用される
 
 {-
 ‘Prelude.sequenceA’ has the same method
