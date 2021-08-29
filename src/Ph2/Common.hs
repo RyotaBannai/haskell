@@ -102,3 +102,23 @@ t (m a) -> m (t a)
 
 sequence_ := 返される値に関心がない場合
 -}
+
+wrapIO :: Show b => b -> IO b
+wrapIO x = print x >> return x
+
+result :: IO [Integer]
+result = takeWhile (< 4) <$> (return [0 .. 5] :: IO [Integer])
+
+{-
+First wrap [0..5] with IO via return (with type hint)
+Then extract values inside monad from each `takeWhile (< 4)` and `[0..5]` via `<$>`
+-}
+
+result2 :: IO ()
+result2 = mapM_ wrapIO (takeWhile (< 4) [0 .. 5])
+
+-- result3 :: IO [Integer]
+result3 :: IO [IO Integer]
+result3 = takeWhileM (fmap (< 4)) (map wrapIO [0 .. 5]) -- [IO b]
+
+-- https://stackoverflow.com/questions/1133800/haskell-monadic-takewhile
