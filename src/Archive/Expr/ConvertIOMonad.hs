@@ -2,9 +2,9 @@
 
 module Archive.Expr.ConvertIOMonad where
 
-import Control.Monad (filterM, forM_, unless, void)
+import Control.Monad (filterM, forM_, unless, void, (>=>))
 import Control.Monad.ListM (takeWhileM)
-import Data.Char (toUpper)
+import Data.Char (toLower, toUpper)
 
 fizzbuzz :: IO ()
 fizzbuzz = do
@@ -116,3 +116,74 @@ expri = filterM (const (<= 4))
 -- function returns m a (in this case `m Bool`)
 expri2 :: [[Integer]]
 expri2 = filterM (\x -> [x <= 4]) [1, 2, 3]
+
+-- *** Get feet deeper into Haskell https://www.schoolofhaskell.com/***
+
+-- List Monad section found from the link: https://www.schoolofhaskell.com/school/starting-with-haskell/basics-of-haskell/13-the-list-monad
+
+-- modCase 'a' # "aA"
+modCase :: Char -> [Char]
+modCase c = [toLower c, toUpper c]
+
+camelize :: Char -> [Char]
+camelize = modCase >=> modCase
+
+-- "aA" >=> modCase # ["aAaA"]
+result7 :: [[Char]]
+result7 = fmap camelize "a"
+
+maybeSuccess :: (Ord a, Num a) => a -> Maybe a
+maybeSuccess x
+  | x > 0 = Just (x -1)
+  | otherwise = Nothing
+
+-- applyTwice 2 # Just 0
+-- applyTwice 1 # Nothing
+-- apply two `x -> m x` functions from left to right. `<=<` is the same purpose with composition order is reversed.
+applyTwice :: Integer -> Maybe Integer
+applyTwice = maybeSuccess >=> maybeSuccess
+
+squares :: (Monad m, Num b) => m b -> m b
+squares lst = do
+  x <- lst
+  return (x * x)
+
+squares' :: (Monad m, Num b) => m b -> m b
+squares' lst = lst >>= \x -> return (x * x)
+
+-- squares'' $ Just 3 # Just 9
+-- squares'' [1..3] # [1,4,9]
+squares'' :: (Foldable t, Functor t, Num a) => t a -> [a]
+squares'' lst = concat $ fmap f lst
+  where
+    f = \x -> [x * x]
+
+-- simply use fmap without concat and single element instead of list.
+squares''' :: (Monad m, Num b) => m b -> m b
+squares''' = fmap sq
+  where
+    sq x = x * x
+
+data Suit = Club | Diamond | Heart | Spade deriving (Show, Enum)
+
+newtype Rank = Rank Int
+
+instance Show Rank where
+  show (Rank 1) = "Ace"
+  show (Rank 11) = "Jack"
+  show (Rank 12) = "Queen"
+  show (Rank 13) = "King"
+  show (Rank i) = show i
+
+-- Produce all pairs.
+-- length deck # 52
+deck :: [(Rank, Suit)]
+deck = [(Rank r, s) | s <- [Club ..], r <- [1 .. 13]]
+
+-- Very inefficient, but extremely pedagogical implementation of quicksort
+sqort :: Ord a => [a] -> [a]
+sqort [] = []
+sqort (p : xs) =
+  sqort [x | x <- xs, x < p]
+    ++ [p]
+    ++ sqort [x | x <- xs, x >= p]
