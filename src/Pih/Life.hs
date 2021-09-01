@@ -1,23 +1,15 @@
 module Pih.Life where
 
 import Data.List (nub)
-import Pih.Common (newline)
+import Pih.Common (Pos, cls, goto, newline)
 
 -- *** 左上 (1,1)を原点とする
-
-cls :: IO ()
-cls = putStr "\ESC[2J"
-
-type Pos = (Int, Int)
 
 writeat :: Pos -> String -> IO ()
 writeat p xs =
   do
     goto p
     putStr xs
-
-goto :: Pos -> IO ()
-goto (x, y) = putStr ("\ESC[" ++ show y ++ ";" ++ show x ++ "H")
 
 width :: Int
 width = 10

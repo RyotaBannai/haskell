@@ -3,6 +3,13 @@ module Pih.Common where
 import System.IO (hSetEcho, stdin)
 
 -- import Control.Monad.Loops
+type Pos = (Int, Int)
+
+cls :: IO ()
+cls = putStr "\ESC[2J"
+
+goto :: Pos -> IO ()
+goto (x, y) = putStr ("\ESC[" ++ show y ++ ";" ++ show x ++ "H")
 
 newline :: IO ()
 newline = putChar '\n'
@@ -14,36 +21,36 @@ getCh = do
   hSetEcho stdin True
   return x
 
-readLine :: IO String
-readLine = readLineCore ""
+readLine' :: IO String
+readLine' = readLineCore' ""
 
-readLineCore :: String -> IO String
-readLineCore xs = do
+readLineCore' :: String -> IO String
+readLineCore' xs = do
   x <- getCh
   case x of
     '\n' -> return xs
     '\DEL' ->
       if null xs
-        then readLineCore ""
+        then readLineCore' ""
         else do
           -- putChar '\b'
           putStr "\b \b"
-          readLineCore $ init xs
+          readLineCore' $ init xs
     _ -> do
       putChar x
-      readLineCore (xs ++ [x])
+      readLineCore' (xs ++ [x])
 
-readLine' :: IO String
-readLine' = dropWhile (== '\DEL') <$> readLineCore'
+readLine :: IO String
+readLine = dropWhile (== '\DEL') <$> readLineCore
 
-readLineCore' :: IO String
-readLineCore' = do
+readLineCore :: IO String
+readLineCore = do
   x <- getCh
   if x == '\n'
     then return []
     else do
       putOrDel x
-      xs <- readLineCore'
+      xs <- readLineCore
       return $ delete (x : xs)
   where
     putOrDel x
