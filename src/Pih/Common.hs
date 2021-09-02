@@ -129,6 +129,20 @@ safetail' xs
 safetail'' :: [a] -> [a]
 safetail'' xs = if null xs then [] else tail xs
 
+data Expr = Val Int | Div Expr Expr
+
+safeDiv :: Int -> Int -> Maybe Int
+safeDiv _ 0 = Nothing
+safeDiv n m = Just (n `div` m)
+
+-- Just for an example of `bing expression`. use `do expression` instead.
+mEval :: Expr -> Maybe Int
+mEval (Val n) = pure n
+mEval (Div x y) =
+  mEval x >>= \n ->
+    mEval y >>= \m ->
+      safeDiv n m
+
 -- take third element in the list
 third :: [a] -> a
 third xs = xs !! 2

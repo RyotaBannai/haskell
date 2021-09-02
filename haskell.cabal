@@ -58,6 +58,7 @@ library
     Pih.Life
     Pih.LuhnAlgo
     Pih.Nim
+    Pih.StateMonad
     Pih.TautologyProver
     Pih.Tictactoe
 

@@ -104,10 +104,12 @@
   - `((+) <$> (*2) <*> (+10)) 4`: apply 4 to each patially applied functions and then combine the results of each fully applied functions.
   - `Applicative functors laws`:
     - `pure f <*> x = fmap f x`
-    - `pure id <*> v = v`
-    - `pure (.) <*> u <*> v <*> w = u <*> (v <*> w)`
-    - `pure f <*> pure x = pure (f x)`
-    - `u <*> pure y = pure ($ y) <*> u`
+    - `[identity]`: `pure id <*> v = v`
+    - `[composition]`: `pure (.) <*> u <*> v <*> w = u <*> (v <*> w)`
+    - `[homomorphism]`: `pure f <*> pure x = pure (f x)`
+    - `[interchange]`: `u <*> pure y = pure ($ y) <*> u`:
+      - `pure (\f -> f 5) <*> Just (+10)` (also can be written `Just ($ (+10)) <*> pure (\f -> f 5)`)
+      - `pure ($ 5) <*> Just (+10)` : you're wrapping a function with pure that `takes another function as its argument`, then applies `x` to it. You provide `f` as the contents of the `Just`, which in this case is `(+10)`.
 - `newtype`:
   - When we use `newtype` to wrap `an existing type`(i.g., `[Char]`, `Int`, etc.), the type that we get is separate from the original type. If we make the following newtype: `newtype CharList = CharList { getCharList :: [Char] }`, WEe can't use `++` to put together a `CharList` and a list of type `[Char]`. We can't even use `++` to put together two `CharLists`, because `++` works only on `lists` and the `CharList` type isn't a list, even though it could be said that it contains one. We can, however, convert two `CharLists` to `lists`, `++` them and then convert that back to a `CharList`(by extarct with a method, in this case `getCharList`. this converts newtype to original type). 
 - `data` vs `type` vs `newtype`:
@@ -161,3 +163,7 @@
 - `インスタンスの自動導出`:
   - 自動導出で `Ord` クラスのインスタンスとした型では、宣言中の位置によって構成子の順序が決まる(ph101)
   - 構成子が引数を取る場合、自動導出をするためには、引数の方もまた適切な型クラスのインスタンスでなければいけない(ph101)
+- `Applicative` の特徴:
+  1. `fmap` で問題となる複数引数を関数に適用するために利用される(`pure g <*> x <*> y` のように g は関数で、x,y は任意の複数の引数).
+  2. `Applicative` は引数として `Maybe`, `IO`, `Eigher`, `[]` など失敗する可能性があったり、成功する結果が複数ある、といった`作用`を持ちうる: この意味で、`「純粋な関数」を「作用を持つ引数」に適用することを抽象化した枠組み`だと見なすことができる. (pih162)
+    - そのため`「純粋な関数」を使うということを強調する`ため, 式の初めに `pure` を使うとより理解しやすくなる. 実際には `<$>` を使用して、`g <$> x <*> y` と表現することの方が多い. (pih164)
