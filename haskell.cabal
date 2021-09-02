@@ -50,12 +50,15 @@ library
     Lyah.TypesAndTypeclasses
     Lyah.ZippersCodes
     Pih.AbstractMachien
+    Pih.Ballots
+    Pih.CaesarCryption
     Pih.Common
     Pih.CountdownProb
     Pih.Hangman
     Pih.Life
-    Pih.MiscCodes
+    Pih.LuhnAlgo
     Pih.Nim
+    Pih.TautologyProver
     Pih.Tictactoe
 
   -- Modules included in this library but not exported.

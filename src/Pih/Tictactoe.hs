@@ -1,3 +1,5 @@
+module Pih.Tictactoe where
+
 import Data.Char
 import Data.List
 import Pih.Common (Pos, cls, goto, newline, readLine)
@@ -208,11 +210,12 @@ bestmove g p = head [g' | Node (g', p') _ <- ts, p' == best]
     Node (_, best) ts = minimax tree
 
 -- デフォルトでは出力がバッファリングされるため、それを止めるために関数 `hSetBuffering` を使用.
-main :: IO ()
-main =
-  do
-    hSetBuffering stdout NoBuffering
-    play empty O
+-- NOTE: commend out when needs a compile
+-- main :: IO ()
+-- main =
+--   do
+--     hSetBuffering stdout NoBuffering
+--     play empty O
 
 play :: Grid -> Player -> IO ()
 play g p =
