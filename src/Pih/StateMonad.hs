@@ -28,6 +28,7 @@ instance Functor ST where
 
 -- Applicative Functor
 -- λ app (pure plusOne <*> stPlusOne) (1 :: State) # (3,2)
+-- λ app (plusOne <$> stPlusOne) (1 :: State)
 instance Applicative ST where
   -- pure :: a -> ST a
   pure x = S (x,) -- (\s -> (x, s))
@@ -36,7 +37,7 @@ instance Applicative ST where
   stf <*> stx =
     S
       ( \s ->
-          let (f, s') = app stf s
+          let (f, s') = app stf s -- `pure f` から `f` を取り出して、s を s' としてそのまま返すだけ
               (x, s'') = app stx s'
            in (f x, s'')
       )
@@ -67,3 +68,39 @@ makeFnSt g n = S (g n,)
 -- No need! use `pure` instead
 -- stPlusOne' :: ST (Int -> Int)
 -- stPlusOne' = S (plusOne,)
+
+data Tree a = Leaf a | Node (Tree a) (Tree a) deriving (Show)
+
+-- test
+ctree :: Tree Char
+ctree = Node (Node (Leaf 'a') (Leaf 'b')) (Leaf 'c')
+
+-- λ fst (rlabel ctree 0) # Node (Node (Leaf 0) (Leaf 1)) (Leaf 2)
+
+rlabel :: Tree a -> Int -> (Tree Int, Int)
+rlabel (Leaf _) n = (Leaf n, n + 1)
+rlabel (Node l r) n = (Node l' r', n'')
+  where
+    (l', n') = rlabel l n
+    (r', n'') = rlabel r n'
+
+fresh :: ST Int
+fresh = S (\n -> (n, n + 1))
+
+-- λ app (alable ctree) 0   # (Node (Node (Leaf 0) (Leaf 1)) (Leaf 2),3)
+-- λ app (Leaf <$> fresh) 0 # (Leaf 0,1)
+-- λ app (Node <$> (Leaf <$> fresh) <*> (Leaf <$> fresh)) 0 # (Node (Leaf 0) (Leaf 1),2)
+alable :: Tree a -> ST (Tree Int)
+alable (Leaf _) = Leaf <$> fresh
+alable (Node l r) = Node <$> alable l <*> alable r
+
+-- With using Monad
+-- λ app (mlable ctree) 0
+mlable :: Tree a -> ST (Tree Int)
+mlable (Leaf _) = do
+  g <- fresh
+  return (Leaf g)
+mlable (Node l r) = do
+  n <- mlable l
+  m <- mlable r
+  return (Node n m)
