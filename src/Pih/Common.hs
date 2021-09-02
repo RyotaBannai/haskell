@@ -1,6 +1,7 @@
 module Pih.Common where
 
-import Data.Char (chr, ord)
+import Control.Monad (filterM)
+import Data.Char (chr, digitToInt, isDigit, ord)
 import System.IO (hSetEcho, stdin)
 
 -- import Control.Monad.Loops
@@ -228,3 +229,14 @@ Succ (addNat' (Succ Zero) (Succ Zero))
 Succ (Succ (addNat' Zero (Succ Zero)))
 Succ (Succ (Succ Zero))
 -}
+
+-- mapM conv "1234" # Just [1,2,3,4]
+conv :: Char -> Maybe Int
+conv c
+  | isDigit c = Just (digitToInt c)
+  | otherwise = Nothing
+
+-- Check out another `subs` リストモナドに対して filterM を用いると`冪集合`を簡単に計算できる.
+-- subs' [1..3] # [[1,2,3],[1,2],[1,3],[1],[2,3],[2],[3],[]]
+subs' :: [b] -> [[b]]
+subs' = filterM (const [True, False])

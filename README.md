@@ -135,12 +135,12 @@
     - `Left identity` and `right identity` are basically laws that describe how `return` should behave
       - `Left identity`: `return x >>= f is the same damn thing as f x`:
         - `return 3 >>= (\x -> Just (x+100000))` and `(\x -> Just (x+100000)) 3 ` are the same.
-      - `RIght identity`: `m >>= return is no different than just m`
+      - `Right identity`: `m >>= return is no different than just m`
         - `return` puts a value in a minimal context that still presentst that value as its result.
         - `Just "move on up" >>= (\x -> return x) -- Just "move on up"`
         - `putStrLn "Wah!" >>= (\x -> return x) -- IO("Wah!")`
     - `Associativity`:
-      - `Doing (m >>= f) >>= g is just like doing m >>= (\x -> f x >>= g)`: we have a chain of monadic function applications with `>>=`, `it shouldn't matter how they're nested`.
+      - `(m >>= f) >>= g = m >>= (\x -> f x >>= g)`: we have a chain of monadic function applications with `>>=`, `it shouldn't matter how they're nested`.
       - `return (0,0) >>= landRight 2 >>= landLeft 2 >>= landRight 2` and `return (0,0) >>= (\x -> landRight 2 x >>= (\y -> landLeft 2 y >>= (\z -> landRight 2 z)))` are the same.
       - `f <=< (g <=< h) `should be the same as `(f <=< g) <=< h`.
 

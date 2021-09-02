@@ -2,6 +2,7 @@
 
 module Pih.StateMonad where
 
+-- import Control.Monad ((>=>))
 import Control.Monad.Identity (Functor)
 
 type State = Int
@@ -45,7 +46,7 @@ instance Applicative ST where
 -- Monad
 -- λ app (stPlusOne >>= plusOneSt) (1 :: State)       # (3,2)
 -- λ app (stPlusOne >>= (makeFnSt (*2))) (1 :: State) # (4,2)
--- `f` は`結果`を適用した結果、 ST になる`関数`
+-- `f` は`結果`を適用した結果、ST になる`関数`
 instance Monad ST where
   -- Expected type: ST b, Actual type: ST (ST b)
   -- (>>=) :: ST a -> (a -> ST b) -> ST b
@@ -95,7 +96,7 @@ alable (Leaf _) = Leaf <$> fresh
 alable (Node l r) = Node <$> alable l <*> alable r
 
 -- With using Monad
--- λ app (mlable ctree) 0
+-- λ app (mlable ctree) 0 # (Node (Node (Leaf 0) (Leaf 1)) (Leaf 2),3)
 mlable :: Tree a -> ST (Tree Int)
 mlable (Leaf _) = do
   g <- fresh
@@ -104,3 +105,11 @@ mlable (Node l r) = do
   n <- mlable l
   m <- mlable r
   return (Node n m)
+
+mfresh :: ST (Tree Int)
+mfresh = S (\n -> (Leaf n, n + 1))
+
+-- λ app (mlable' ctree) 0 # (Leaf 2, 3)
+-- mlable' :: Tree a -> ST (Tree Int)
+-- mlable' (Leaf _) = pure Leaf >>= pure mfresh
+-- mlable' (Node l r) = pure Node >>= pure (mlable' l) >>= pure (mlable' r)
