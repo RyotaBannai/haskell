@@ -1,15 +1,9 @@
 module Pih.Life where
 
 import Data.List (nub)
-import Pih.Common (Pos, cls, goto, newline)
+import Pih.Common (Pos, cls, newline, writeat)
 
 -- *** 左上 (1,1)を原点とする
-
-writeat :: Pos -> String -> IO ()
-writeat p xs =
-  do
-    goto p
-    putStr xs
 
 width :: Int
 width = 10

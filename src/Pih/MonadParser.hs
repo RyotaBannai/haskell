@@ -7,7 +7,15 @@ module Pih.MonadParser where
 
 import Control.Applicative (Alternative (empty, many, some, (<|>)))
 import Data.Char
+  ( isAlpha,
+    isAlphaNum,
+    isDigit,
+    isLower,
+    isSpace,
+    isUpper,
+  )
 import GHC.Base (Applicative)
+import Pih.Common (cls, getCh, goto, writeat)
 
 -- import Data.Graph (Tree)
 
@@ -228,8 +236,94 @@ factor =
     return e
     <|> natural
 
-eval :: String -> Int
+-- calculator
+{-
+q : quit
+c : clear
+d : delete
+also including, Q, C, D, blank, escape, backspace, delete (\DEL), and neline
+-}
+
+box :: [String]
+box =
+  [ "+---------------+",
+    "|               |",
+    "+---+---+---+---+",
+    "| q | c | d | = |",
+    "+---+---+---+---+",
+    "| 1 | 2 | 3 | + |",
+    "+---+---+---+---+",
+    "| 4 | 5 | 6 | - |",
+    "+---+---+---+---+",
+    "| 7 | 8 | 9 | * |",
+    "+---+---+---+---+",
+    "| 0 | ( | ) | / |",
+    "+---+---+---+---+\n"
+  ]
+
+buttons :: String
+buttons = standard ++ extra
+  where
+    standard = "qcd=123+456-789*0()/"
+    extra = "QCD \ESC\BS\DEL\n"
+
+showbox :: IO ()
+showbox = sequence_ [writeat (1, y) b | (y, b) <- zip [1 ..] box]
+
+display :: String -> IO ()
+display xs = do
+  writeat (3, 2) (replicate 13 ' ') -- 初期化
+  writeat (3, 2) (reverse (take 13 (reverse xs)))
+
+calc :: String -> IO ()
+calc xs = do
+  display xs
+  c <- getCh
+  if c `elem` buttons
+    then process c xs
+    else do
+      beep
+      calc xs
+
+beep :: IO ()
+beep = putStr "\BEL"
+
+process :: Char -> String -> IO ()
+process c xs
+  | c `elem` "qQ\ESC" = quit
+  | c `elem` "dD\BS\DEL" = delete xs
+  | c `elem` "=\n" = eval xs
+  | c `elem` "cC" = clear
+  | otherwise = press c xs
+
+quit :: IO ()
+quit = goto (1, 14)
+
+delete :: String -> IO ()
+delete [] = calc []
+delete xs = calc (init xs)
+
+-- eval :: String -> Int
+-- eval xs = case parse expr xs of
+--   [(n, [])] -> n
+--   [(_, out)] -> error ("Unused input \"" ++ out ++ "\"")
+--   [] -> error "Invalid input"
+
+eval :: String -> IO ()
 eval xs = case parse expr xs of
-  [(n, [])] -> n
-  [(_, out)] -> error ("Unused input \"" ++ out ++ "\"")
-  [] -> error "INvalid input"
+  [(n, [])] -> calc (show n)
+  _ -> do
+    beep
+    calc xs
+
+clear :: IO ()
+clear = calc []
+
+press :: Char -> String -> IO ()
+press c xs = calc (xs ++ [c])
+
+run :: IO ()
+run = do
+  cls
+  showbox
+  clear

@@ -13,6 +13,12 @@ cls = putStr "\ESC[2J"
 goto :: Pos -> IO ()
 goto (x, y) = putStr ("\ESC[" ++ show y ++ ";" ++ show x ++ "H")
 
+writeat :: Pos -> String -> IO ()
+writeat p xs =
+  do
+    goto p
+    putStr xs
+
 newline :: IO ()
 newline = putChar '\n'
 
