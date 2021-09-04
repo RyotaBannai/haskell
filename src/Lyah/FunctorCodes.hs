@@ -1,10 +1,20 @@
 module Lyah.FunctorCodes where
 
 import Control.Applicative
-import Data.Char
+  ( Applicative (liftA2),
+    ZipList (ZipList, getZipList),
+  )
+import Data.Char (toUpper)
+import Data.Foldable (Foldable (toList))
 import qualified Data.Foldable as F
-import Data.List
+import Data.List (intersperse)
+import Data.Maybe (fromMaybe)
 import Data.Monoid
+  ( Any (Any, getAny),
+    First (First, getFirst),
+    Last (Last, getLast),
+    Product (Product, getProduct),
+  )
 import Lyah.DataTypeAndTypeclasses (Tree (EmptyTree, Node), treeInsert)
 
 -- reverse text
@@ -51,14 +61,14 @@ myIOAction = (++) <$> getLine <*> getLine
 
 -- Functions as Applicative functor
 -- applyToAllFunctions 5 >> 508
-applyToAllFunctions :: Integer -> Integer
+applyToAllFunctions :: Int -> Int
 applyToAllFunctions = (+) <$> (+ 3) <*> (* 100)
 
 -- applyToAllFunctions' 5 >> [8.0, 10.0, 2.5]
 applyToAllFunctions' :: Double -> [Double]
 applyToAllFunctions' = (\x y z -> [x, y, z]) <$> (+ 3) <*> (* 2) <*> (/ 2)
 
-sampleZipList :: [Integer]
+sampleZipList :: [Int]
 sampleZipList = getZipList $ (*) <$> ZipList [1, 2, 3] <*> ZipList [1, 5, 10]
 
 -- [('d', 'c', 'r'), ('o', 'a', 'a'), ('g', 't', 't')]
@@ -104,8 +114,9 @@ instance Functor (Pair c) where
 -- getPair $ fmap (*100) (Pair (2,3)) >> (200, 3)
 -- getPair $ fmap reverse  (Pair ("los angeles",3)) >> ("selegna sol",3)
 
--- Monoids:
-re :: Integer
+-- *** Monoids ***
+
+re :: Int
 re = getProduct . mconcat $ map Product [3, 4, 5]
 
 -- instead of writing:
@@ -123,12 +134,14 @@ lengthCompare' x y =
     <> (x `compare` y) -- `<>` is an alias for `mappend`
 
 -- get First result >> Just 9
-fre :: Maybe Integer
+fre :: Maybe Int
 fre = getFirst . mconcat . map First $ [Nothing, Just 9, Just 10]
 
--- gete Last result >> Just "two"
+-- get Last result >> Just "two"
 lre :: Maybe [Char]
 lre = getLast $ Last (Just "one") <> Last (Just "two")
+
+-- *** Foldable ***
 
 -- Foldable for Tree
 -- We have a Foldable instance for our tree type, we get `foldr` and `foldl` for free!
@@ -140,20 +153,114 @@ instance F.Foldable Tree where
       <> f x
       <> F.foldMap f r
 
-treeValues :: [Integer]
+treeValues :: [Int]
 treeValues = [5, 4, 2, 6, 3, 7, 8, 1]
 
-testTree :: Tree Integer
+treeValues' :: [Bool]
+treeValues' = [True, False, True]
+
+treeValues'' :: [Maybe Int]
+treeValues'' = [Just 1, Just 2, Just 3]
+
+testTree :: Tree Int
 testTree = foldr treeInsert EmptyTree treeValues
 
--- Should equals to `sum treeValues` >> 36
-treeValsSum :: Integer
+testTree' :: Tree Bool
+testTree' = foldr treeInsert EmptyTree treeValues'
+
+{-
+Prelude.sequenceA := t (f a) -> f (t a)
+testTree'' := Node (Just 3) (Node (Just 2) (Node (Just 1) EmptyTree EmptyTree) EmptyTree) EmptyTree
+
+λ Prelude.sequenceA testTree''
+Just (Node 3 (Node 2 (Node 1 EmptyTree EmptyTree) EmptyTree) EmptyTree)
+-}
+testTree'' :: Tree (Maybe Int)
+testTree'' = foldr treeInsert EmptyTree treeValues''
+
+-- λ sum treeValues # 36
+-- treeValsSum = 36
+treeValsSum :: Int
 treeValsSum = F.foldl (+) 0 testTree -- F.foldl1 (+) testTree
+
+-- treeValsSum' = Just 6
+-- If any item of treeValues'' is Nothing, then result is Nothing.
+treeValsSum' :: Maybe Int
+treeValsSum' =
+  F.foldl1
+    ( \m n -> do
+        m' <- m
+        n' <- n
+        return (m' + n')
+    )
+    testTree''
+
+-- conv = 6
+conv :: Int
+conv = case treeValsSum' of
+  Nothing -> 0
+  Just i -> i
+
+-- conv' = 6
+conv' :: Int
+conv' = fromMaybe 0 treeValsSum'
 
 -- Check if we want to know if any number in our tree is equal to 3, we can do this:
 -- `foldMap` applies this function to every element in our tree and then reduces the resulting `monoids` into a single `monoid` with `mappend`
 checkTree :: Bool
 checkTree = getAny $ F.foldMap (\x -> Any $ x == 3) testTree -- `Any`, `All` from `Data.Monoid`
 
-getBackTreeValues :: [Integer]
+getBackTreeValues :: [Int]
 getBackTreeValues = F.foldMap (: []) testTree -- (: []) := (\x -> [x])
+
+getBackTreeValues' :: [Int]
+getBackTreeValues' = toList testTree
+
+-- λ average testTree # 4
+average :: Foldable t => t Int -> Int
+average ns = sum ns `div` length ns
+
+-- λ all even testTree  # False
+-- λ and testTree'      # False
+
+-- *** Traversable ***
+
+-- λ traverse dec [1,2,3] # Just [0,1,2]
+-- λ traverse dec [1,2,0] # Nothing
+dec :: Int -> Maybe Int
+dec n = if n > 0 then Just (n -1) else Nothing
+
+-- λ traverse dec testTree # Just (...)
+-- λ traverse dec testTree # Nothing when `treeValues` with 0
+-- class (Functor t, Foldable t) => Traversable t where
+instance Traversable Tree where
+  -- traverse :: Applicative f => (a -> t b) -> Tree a -> f (Tree b)
+  traverse _ EmptyTree = pure EmptyTree
+  traverse g (Node x l r) =
+    Node <$> g x
+      <*> traverse g l
+      <*> traverse g r
+
+-- λ mapM_ print testTree
+
+re1 :: Tree Int
+re1 = fmap (+ 1) testTree
+
+re2 :: Maybe (Tree (Maybe Int))
+re2 = mapM Just testTree''
+
+re3 :: Maybe (Tree Int)
+re3 = mapM id testTree'' -- sequence testTree''
+
+-- Just (Node 4 (Node 3 (Node 2 EmptyTree EmptyTree) EmptyTree) EmptyTree)
+re4 :: Maybe (Tree Int)
+re4 =
+  traverse
+    ( \m -> do
+        x <- m
+        return (x + 1)
+    )
+    testTree''
+
+re4' :: Maybe (Tree Int)
+re4' = mapM (\m -> m >>= (\x -> Just (x + 1))) testTree''
