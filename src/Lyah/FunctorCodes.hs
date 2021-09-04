@@ -264,3 +264,17 @@ re4 =
 
 re4' :: Maybe (Tree Int)
 re4' = mapM (\m -> m >>= (\x -> Just (x + 1))) testTree''
+
+re4'' :: Maybe (Tree Int)
+re4'' = mapM (\a -> (+ 1) <$> a) testTree''
+
+re5 :: Tree (Maybe Int)
+re5 = fmap (\a -> (+ 1) <$> a) testTree''
+
+-- re6 = [[1,1],[1,2]] -- non-deterministic ops
+re6 :: [[Int]]
+re6 = (:) <$> [1] <*> [[1], [2]]
+
+-- re7 = Just [1,1] -- cons
+re7 :: Maybe [Integer]
+re7 = (:) <$> Just 1 <*> Just [1]
