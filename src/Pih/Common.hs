@@ -246,3 +246,26 @@ conv c
 -- subs' [1..3] # [[1,2,3],[1,2],[1,3],[1],[2,3],[2],[3],[]]
 subs' :: [b] -> [[b]]
 subs' = filterM (const [True, False])
+
+-- エラトステネスのふるい
+-- λ take 10 primes
+-- λ takeWhile (<10) primes
+primes :: [Int]
+primes = sieve [2 ..]
+
+sieve :: [Int] -> [Int]
+sieve (p : xs) = p : sieve [x | x <- xs, x `mod` p /= 0]
+
+fibs :: [Integer]
+fibs = 0 : 1 : [a + b | (a, b) <- zip fibs (tail fibs)]
+
+fibs' :: [Integer]
+fibs' = 0 : 1 : zipWith (+) fibs' (tail fibs')
+
+sqroot :: Double -> Double
+sqroot n = head $ dropWhile (\x -> x - sqrt 10 > 0.00001) (newton n)
+
+newton :: Double -> [Double]
+newton n = iterate next n
+  where
+    next a = (a + n / a) / 2

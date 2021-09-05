@@ -249,6 +249,7 @@ re1 = fmap (+ 1) testTree
 re2 :: Maybe (Tree (Maybe Int))
 re2 = mapM Just testTree''
 
+-- `re3 = Nothing` when any of `Node value is Nothing`.
 re3 :: Maybe (Tree Int)
 re3 = mapM id testTree'' -- sequence testTree''
 
