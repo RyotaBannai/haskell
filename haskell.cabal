@@ -59,6 +59,7 @@ library
     Pih.LuhnAlgo
     Pih.MonadParser
     Pih.Nim
+    Pih.Reasoning
     Pih.StateMonad
     Pih.TautologyProver
     Pih.Tictactoe
