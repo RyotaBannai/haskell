@@ -271,13 +271,22 @@ re4'' :: Maybe (Tree Int)
 re4'' = mapM (\a -> (+ 1) <$> a) testTree''
 
 re4''' :: Maybe (Tree Int)
-re4''' = mapM (fmap (1 +)) testTree''
+re4''' = mapM (fmap (+ 1)) testTree''
 
 re4'''' :: Maybe (Tree Int)
 re4'''' = mapM (liftM2 (+) (Just 1)) testTree''
 
 re5 :: Tree (Maybe Int)
 re5 = fmap (\a -> (+ 1) <$> a) testTree''
+
+-- Container がネストしている場合は fmap を二重にする:
+-- outer  _ :: (Maybe Int -> Maybe Int) -> Tree (Maybe Int) -> Tree (Maybe Int)
+-- innter _ :: (Int -> Int) -> Maybe Int -> Maybe Int
+re5' :: Tree (Maybe Int)
+re5' = fmap (fmap (+ 1)) testTree''
+
+re5'' :: Tree (Maybe Int)
+re5'' = (fmap . fmap) (+ 1) testTree''
 
 -- re6 = [[1,1],[1,2]] -- non-deterministic ops
 re6 :: [[Int]]
