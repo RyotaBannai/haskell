@@ -4,6 +4,7 @@ import Control.Applicative
   ( Applicative (liftA2),
     ZipList (ZipList, getZipList),
   )
+import Control.Monad (liftM2)
 import Data.Char (toUpper)
 import Data.Foldable (Foldable (toList))
 import qualified Data.Foldable as F
@@ -268,6 +269,12 @@ re4' = mapM (\m -> m >>= (\x -> Just (x + 1))) testTree''
 
 re4'' :: Maybe (Tree Int)
 re4'' = mapM (\a -> (+ 1) <$> a) testTree''
+
+re4''' :: Maybe (Tree Int)
+re4''' = mapM (fmap (1 +)) testTree''
+
+re4'''' :: Maybe (Tree Int)
+re4'''' = mapM (liftM2 (+) (Just 1)) testTree''
 
 re5 :: Tree (Maybe Int)
 re5 = fmap (\a -> (+ 1) <$> a) testTree''
