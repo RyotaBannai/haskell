@@ -52,6 +52,7 @@ library
     Pih.AbstractMachien
     Pih.Ballots
     Pih.CaesarCryption
+    Pih.CalculatingCompilers
     Pih.Common
     Pih.CountdownProb
     Pih.Hangman
