@@ -15,7 +15,7 @@ data Expr = Val Int | Add Expr Expr
 -- value (Add (Add (Val 2) (Val 3)) (Val 4)) # 9
 value' :: Expr -> Int
 value' (Val n) = n
-value' (Add x y) = value x + value y
+value' (Add x y) = value' x + value' y
 
 -- value' := 式を評価して整数にする関数. 与えられた式と空の制御スタックを引数に指定して eval を実行.
 -- value (Add (Add (Val 2) (Val 3)) (Val 4)) # 9
