@@ -4,11 +4,12 @@ import Control.Applicative
   ( Applicative (liftA2),
     ZipList (ZipList, getZipList),
   )
-import Control.Monad (liftM2)
+import Control.Monad (ap, liftM2)
 import Data.Char (toUpper)
 import Data.Foldable (Foldable (toList))
 import qualified Data.Foldable as F
-import Data.List (intersperse)
+import Data.Function (on)
+import Data.List (intersperse, sortBy)
 import Data.Maybe (fromMaybe)
 import Data.Monoid
   ( Any (Any, getAny),
@@ -264,8 +265,11 @@ re4 =
     )
     testTree''
 
+maybeAddOne :: Int -> Maybe Int
+maybeAddOne x = Just (x + 1)
+
 re4' :: Maybe (Tree Int)
-re4' = mapM (\m -> m >>= (\x -> Just (x + 1))) testTree''
+re4' = mapM (>>= maybeAddOne) testTree'' -- (\m -> m >>= maybeAddOne)
 
 re4'' :: Maybe (Tree Int)
 re4'' = mapM (\a -> (+ 1) <$> a) testTree''
@@ -288,6 +292,9 @@ re5' = fmap (fmap (+ 1)) testTree''
 re5'' :: Tree (Maybe Int)
 re5'' = (fmap . fmap) (+ 1) testTree''
 
+re5''' :: Tree (Maybe Int)
+re5''' = fmap (>>= maybeAddOne) testTree''
+
 -- re6 = [[1,1],[1,2]] -- non-deterministic ops
 re6 :: [[Int]]
 re6 = (:) <$> [1] <*> [[1], [2]]
@@ -295,3 +302,33 @@ re6 = (:) <$> [1] <*> [[1], [2]]
 -- re7 = Just [1,1] -- cons
 re7 :: Maybe [Integer]
 re7 = (:) <$> Just 1 <*> Just [1]
+
+-- *** S' Combinator (with liftM2 or starling', phoneix from Data.Aviary.Birds)***
+
+findGCD :: (Integral r, Foldable t) => t r -> r
+findGCD = liftM2 gcd minimum maximum
+
+findGCD' :: (Integral r, Foldable t) => t r -> r
+findGCD' = liftA2 gcd minimum maximum
+
+findGCD'' :: (Integral r, Foldable t) => t r -> r
+findGCD'' = return gcd `ap` minimum `ap` maximum
+
+findGCD''' :: (Integral r, Foldable t) => t r -> r
+findGCD''' = gcd <$> minimum <*> maximum
+
+{-
+on :: (b -> b -> c) -> (a -> b) -> a -> a -> c
+compare :: (b -> b -> c)
+fst :: (a -> b)
+a :: (f, s)
+c :: Ordering
+-}
+sortList :: Ord a => [(a, b)] -> [(a, b)]
+sortList = sortBy (compare `on` fst)
+
+{-
+($) application operator :
+f $ g $ h x  =  f (g (h x))
+It is also useful in higher-order situations, such as `map ($ 0) xs`, or `zipWith ($) fs xs`.
+-}
