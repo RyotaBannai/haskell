@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Archive.Expr.ConvertIOMonad where
+module Archive.ConvertIOMonad where
 
 import Control.Monad (filterM, forM_, unless, void, (>=>))
 import Control.Monad.ListM (takeWhileM)

@@ -27,8 +27,9 @@ extra-source-files:
 library
   -- cabal-fmt: expand src
   exposed-modules:
-    Archive.Expr.ConvertIOMonad
-    Archive.Expr.MonadTrans
+    Archive.ArrowExpr
+    Archive.ConvertIOMonad
+    Archive.MonadTrans
     Lyah.Baby
     Lyah.DataTypeAndTypeclasses
     Lyah.FunctorCodes

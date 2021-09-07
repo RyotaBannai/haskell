@@ -1,4 +1,4 @@
-module Archive.Expr.MonadTrans where
+module Archive.MonadTrans where
 
 import Control.Applicative
 import Control.Monad
