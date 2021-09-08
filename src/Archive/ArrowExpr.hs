@@ -44,3 +44,30 @@ type NonDet a b = a -> [b]
 -- これはそれぞれの出力の要素を足し合わせているに過ぎない
 addND :: NonDet a Int -> NonDet a Int -> NonDet a Int
 addND f g a = [x + y | x <- f a, y <- g a]
+
+-- *** 写像変換 := データ並列アルゴリズムなどに使われる ***
+
+{-
+a の値によって結果が違う関数を相互に変換すると捉えられる
+また、a を`時間変化する値`を考えれば、写`像変換子`は各時間における関数(振る舞い)を変換するものになる
+-}
+
+type MapTrans a b c = (a -> b) -> (a -> c)
+
+addMT :: MapTrans a b Int -> MapTrans a b Int -> MapTrans a b Int
+addMT f g m s = f m s + g m s
+
+-- *** 単純オートマン := 入力を、出力と自分自身の状態を更新する計算 ***
+
+newtype Auto a b = A (a -> (b, Auto a b))
+
+addAuto :: Auto a Int -> Auto a Int -> Auto a Int
+addAuto (A f) (A g) =
+  A
+    ( \b ->
+        let (x, f') = f b
+            (y, g') = g b
+         in (x + y, addAuto f' g')
+    )
+
+-- fstAuto = A (\b -> ("fstAuto", Auto))
