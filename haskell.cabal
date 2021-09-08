@@ -50,6 +50,7 @@ library
     Lyah.SyntaxInFunction
     Lyah.TypesAndTypeclasses
     Lyah.ZippersCodes
+    Pia.Intro
     Pih.AbstractMachien
     Pih.Ballots
     Pih.CaesarCryption
