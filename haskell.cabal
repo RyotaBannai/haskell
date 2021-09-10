@@ -52,6 +52,7 @@ library
     Lyah.ZippersCodes
     Pia.Circuits
     Pia.Intro
+    Pia.Unsafe
     Pih.AbstractMachien
     Pih.Ballots
     Pih.CaesarCryption

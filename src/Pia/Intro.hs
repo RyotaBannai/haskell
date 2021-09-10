@@ -10,6 +10,8 @@ module Pia.Intro where
 import Control.Arrow
 import qualified Control.Category as Cat
 import Control.Monad ((<=<))
+import GHC.Show (appPrec)
+import Pia.Unsafe (unsafePrint)
 
 -- import Debug.Trace
 
@@ -135,7 +137,7 @@ instance ArrowLoop SF where
 λ uncurry zip ([1],[2]) # [(1,2)]
 -}
 
-testSF :: [Integer]
+testSF :: [Int]
 testSF = runSF (arr (+ 1) >>> arr (flip (-) 1)) [1 .. 5] -- or subtract 1
 
 {-
@@ -179,7 +181,7 @@ testAddA :: Kleisli IO FilePath [Char]
 testAddA = readFile' &&& readFile' >>> arr (uncurry (++))
 
 -- λ runSF pairPred [1..5] # [(1,0),(2,1),(3,2),(4,3),(5,4)]
-pairPred :: SF Integer (Integer, Integer)
+pairPred :: SF Int (Int, Int)
 pairPred = arr id &&& delay 0
 
 {-
@@ -211,7 +213,7 @@ testAst :: Kleisli IO (Int, Int) (Int, Int)
 testAst = arr (* 2) *** arr (+ 2)
 
 -- testFirst := [(2,1),(4,2),(6,3)]
-testFirst :: [(Integer, Integer)]
+testFirst :: [(Int, Int)]
 testFirst = runSF (first (arr (* 2))) [(1, 1), (2, 2), (3, 3)]
 
 {-
@@ -292,14 +294,14 @@ g f b = let (c,d) = f (b,d) in c
 -}
 
 -- ステップごと一つ前のステップの値を fst に, 新しい値を snd に入れたペア -> ペアの関数を loop の引数にすればいい
-fact :: Integer -> Integer
+fact :: Int -> Int
 fact = loop (\(n, g) -> (g n, \n -> if n == 0 then 1 else n * g (n - 1)))
 
 -- *** Arrow Application ***
 
 {-
 proc (x, y) -> delay False -< x && y
-arr(\(x, y) -> x && y) >>> delay Fase
+arr(\(x, y) -> x && y) >>> delay False
 
 Translation:
 proc pat -> a -< e
@@ -330,3 +332,38 @@ proc pat -> do x <- c1
                c2
 (arr id &&& proc pat -> c1) >>> c2 proc (pat,x) -> c2
 -}
+
+-- λ runSF exampleCommandCombinator [1..5] # [(1,0),(2,1),(3,2),(4,3),(5,4)]
+exampleCommandCombinator :: SF Int (Int, Int)
+exampleCommandCombinator = proc x -> 
+  do returnA -< x 
+  &&& do delay 0 -< x -- `&&&`is on different block, which makes says do block after `&&&` is not a part of the preeding command.
+
+-- Pattern if `a command combinator` is not `an infix operator` called `banana brackets`
+exampleCommandCombinator' :: SF Int (Int, Int)
+exampleCommandCombinator' = proc x -> (| (&&&) (returnA -< x) (delay 0 -< x) |)
+
+exampleCommandCombinator'' :: SF Int (Int, Int)
+exampleCommandCombinator'' = returnA &&& delay 0
+
+
+mapC :: ArrowChoice arr => arr (env,a) b -> arr (env,[a]) [b]
+mapC c = proc (env,xs) ->
+  case xs of
+    [] -> returnA -< []
+    x:xs' -> do y <- c -< (env,x)
+                ys <- mapC c -< (env,xs')
+                returnA -< y:ys
+
+
+{-
+https://tnomura9.exblog.jp/18647337/
+Expected type:
+SF (a, (t2, ())) (t1, t2) -> SF (a, (t2, ()))   [(t1, t2)]
+Actual type: 
+SF (a, (t2, ())) (t1, t2) -> SF (a, [(t2, ())]) [(t1, t2)]
+-}
+-- exampleCommandCombinator''' :: SF (t1, [Int]) [(t1, [Int])]
+-- exampleCommandCombinator''' = proc (n,xs) ->
+--     (| mapC (\x -> do delay 0 -< n
+--                &&& do returnA -< x) |) xs
