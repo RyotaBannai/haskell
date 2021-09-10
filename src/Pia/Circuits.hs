@@ -1,3 +1,5 @@
+{-# LANGUAGE Arrows #-}
+
 module Pia.Circuits where
 
 import Control.Arrow
@@ -30,6 +32,16 @@ flipflop =
         >>> delay (False, True)
         >>> arr id &&& arr id -- duplicate
     )
+
+-- reexpress by pointed expression
+
+flipflop' :: ArrowCircuit a => a (Bool, Bool) (Bool, Bool)
+flipflop' = proc (reset, set) -> do
+  rec c <- delay False -< nor reset d
+      d <- delay True -< nor set c
+  returnA -< (c, d)
+  where
+    nor a b = not (a || b)
 
 class Signal a where
   showSignal :: [a] -> String

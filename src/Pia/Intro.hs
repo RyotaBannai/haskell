@@ -1,3 +1,4 @@
+{-# LANGUAGE Arrows #-}
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 -- {-# LANGUAGE FlexibleContexts #-}
@@ -52,6 +53,15 @@ print' = Kleisli print
 
 printFile :: Kleisli IO FilePath ()
 printFile = readFile' >>> print'
+
+-- reexpress printFile with `arrow do block comand`
+{-
+While `a monadic do block` is an `expression`, `an arrow do block` is a `command`, and can thus only appear `inside an arrow abstraction`(which means inside `proc` in the example below).
+-}
+printFile' :: Kleisli IO FilePath ()
+printFile' = proc name -> do
+  s <- readFile' -< name
+  print' -< s
 
 -- Kleisli 型の中の IO モナドを取り出す場合は、runKleisli
 testPrintFile :: IO ()
@@ -228,6 +238,21 @@ listcase (x : xs) = Right (x, xs)
 mapA :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapA f = arr listcase >>> arr (const []) ||| (f *** mapA f >>> arr (uncurry (:)))
 
+-- with {-# LANGUAGE Arrows #-}
+-- returnA := arr id , we could use `arr (const [])` instead of `returnA`
+mapA' :: (b -> c) -> [b] -> [c]
+mapA' f = proc xs -> case xs of
+  [] -> returnA -< []
+  x : xs' -> (f *** mapA' f >>> uncurry (:)) -< (x, xs')
+
+mapA'' :: (b -> c) -> [b] -> [c]
+mapA'' f = proc xs -> case xs of
+  [] -> returnA -< []
+  x : xs' -> do
+    y <- f -< x
+    ys <- mapA'' f -< xs'
+    returnA -< y : ys
+
 {-
 To check `a rising edge` (which is the first rising point in the wave)
 by `delay` the original signals.
@@ -239,6 +264,12 @@ edge :: SF Bool Bool
 edge = arr id &&& delay False >>> arr detect
   where
     detect (a, b) = a && not b
+
+-- reexpress `edge`
+edge' :: SF Bool Bool
+edge' = proc a -> do
+  b <- delay False -< a
+  returnA -< a && not b
 
 {-
 λ addOneToTuple(False,[]) # ([],[1])
@@ -260,6 +291,42 @@ g f b = let (c,d) = f (b,d) in c
 λ take 10 $ g f []
 -}
 
--- ステップごと一つ前のステップの値を fst に新しい値を snd に入れたペア -> ペアの関数を loop の引数にすればいい
+-- ステップごと一つ前のステップの値を fst に, 新しい値を snd に入れたペア -> ペアの関数を loop の引数にすればいい
 fact :: Integer -> Integer
 fact = loop (\(n, g) -> (g n, \n -> if n == 0 then 1 else n * g (n - 1)))
+
+-- *** Arrow Application ***
+
+{-
+proc (x, y) -> delay False -< x && y
+arr(\(x, y) -> x && y) >>> delay Fase
+
+Translation:
+proc pat -> a -< e
+arr (\pat -> e) >>> a
+
+`arrow-bound variables` (such as `x` and `y` in the AND-gate example above) are not in scope `to the left of the -<`. This is an easy way to see that `proc` could not possibly be implemented by a combinator taking a `λ-expression` as an argument: the scopes of `arrow-bound variables` do not correspond to the scopes of `λ-bound variables`.
+
+Therefore,
+proc (f,x) -> f -< x
+which is rejected, because it translates to arr `(\(f,x)->x) >>> f`, in which `f` is used outside its scope.
+
+関数 f を引数 x に適応したい場合は、`app` を使う:
+proc (f,x) -> app -< (f,x)
+または、
+proc (f,x) -> f -<< x
+
+Alternative for Choice combinator `|||`:
+`arr (\x -> if p x then Left x else Right x) >>> f ||| g`
+By using the opinted arrow notation:
+`proc x -> if p x then f -< x else g -< x`
+
+Translation:
+proc pat -> if e then c1 else c2
+arr (\pat -> if e then Left pat else Right pat) >>> (proc pat -> c1 ||| proc pat -> c2)}
+
+Translation for `do`:
+proc pat -> do x <- c1
+               c2
+(arr id &&& proc pat -> c1) >>> c2 proc (pat,x) -> c2
+-}
