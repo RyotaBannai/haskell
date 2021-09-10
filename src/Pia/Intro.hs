@@ -95,6 +95,31 @@ instance ArrowChoice SF where
       combine [] zs = []
 
 {-
+The ~ in the definition of stream indicates Haskell’s lazy pattern matching:
+it delays matching the argument of stream against the pattern (x:xs) until the bound variables x and xs are actually used.
+Thus stream returns an infinite list without evaluating its argument
+Semantically, stream ⊥=⊥:⊥:⊥: . . .. As a result, provided as is defined, then so is zip as (stream ⊥) — it is a list of pairs with undefined second components. Since neither f nor unzip needs these components to deliver a defined result, we now obtain defined values for bs and cs in the second approximation, and indeed the limit of the approximations is the result we expect. The reader who finds this argument difficult should work out the sequence of approximations in the call `runSF (loop (arr swap)) [1,2,3]` — it is quite instructive to do so.
+
+λ runSF (loop (arr swap)) [1,2,3]          # [1,2,3]
+λ runSF (loop (arr id)) [1,2,3]            # [1,2,3]
+λ runSF (loop (first (arr (+1)))) [1,2,3]  # [2,3,4]
+λ runSF (loop (second (arr (+1)))) [1,2,3] # [1,2,3]
+
+-}
+swap :: (a, b) -> (b, a)
+swap (x, y) = (y, x)
+
+instance ArrowLoop SF where
+  -- loop :: SF (b, d) (c, d) -> SF b c
+  -- old
+  -- loop (SF f) = SF $ \as ->
+  --   let (bs, cs) = unzip (f (zip as cs)) in bs
+
+  loop (SF f) = SF $ \as -> let (bs, cs) = unzip (f (zip as (stream cs))) in bs
+    where
+      stream ~(x : xs) = x : stream xs
+
+{-
 λ unzip [(1,2)]         # ([1],[2])
 λ zip [1] [2]           # [(1,2)]
 λ uncurry zip ([1],[2]) # [(1,2)]
@@ -186,8 +211,8 @@ ifte :: Arrow arr => arr a Bool -> arr a b -> arr a b -> arr a b
 ifte p f g
 
 ifte p f g = p &&& arr id >>> f ||| g
-First of all, we can easiy factor out p by computing its result before the choice:
-we can do si with p &&& arr id, which outputs a pair of the boolean(the result of `p`) and the original input(with identity function). `f ||| g` chooses between f and g on the basis of the first component of the pait in its input, passing th second component on `f` f or `g`
+First of all, we can easiy factor out `p` by computing its result before the choice:
+we can do so with p &&& arr id, which outputs a pair of the boolean(the result of `p`) and the original input(with identity function). `f ||| g` chooses between f and g on the basis of the first component of the pait in its input, passing the second component on `f` or `g`
 But we can do better than this with `Either`
 
 class Arrow arr => ArrowChoice arr where
@@ -202,3 +227,39 @@ listcase (x : xs) = Right (x, xs)
 -- arr listcase := Predicate in this case, which return either `Left` or `Right`.
 mapA :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapA f = arr listcase >>> arr (const []) ||| (f *** mapA f >>> arr (uncurry (:)))
+
+{-
+To check `a rising edge` (which is the first rising point in the wave)
+by `delay` the original signals.
+[F, T, T, F, F] -- original
+[F, F, T, T, F] -- delayed
+The second will be the rising edge(or, a pulse).
+-}
+edge :: SF Bool Bool
+edge = arr id &&& delay False >>> arr detect
+  where
+    detect (a, b) = a && not b
+
+{-
+λ addOneToTuple(False,[]) # ([],[1])
+λ f (f (f ([],[])))       # ([1,1],[1,1,1]), f = addOneToTuple
+
+first は前の引数だから無視して、 second が新しいためそれを元に関数を構築
+-}
+addOneToTuple :: Num a1 => (a2, [a1]) -> ([a1], [a1])
+addOneToTuple (a, b) = (b, 1 : b)
+
+{-
+instance ArrowLoop (->) where
+  -- 引数として与えた b に何らかの処理を加えて、その結果を返す.
+  loop f b = let (c,d) = f (b,d) in c
+
+λ take 3 $ loop addOneToTuple [] # [1,1,1]
+
+g f b = let (c,d) = f (b,d) in c
+λ take 10 $ g f []
+-}
+
+-- ステップごと一つ前のステップの値を fst に新しい値を snd に入れたペア -> ペアの関数を loop の引数にすればいい
+fact :: Integer -> Integer
+fact = loop (\(n, g) -> (g n, \n -> if n == 0 then 1 else n * g (n - 1)))
