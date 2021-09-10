@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+
 -- {-# LANGUAGE FlexibleContexts #-}
 -- {-# LANGUAGE TupleSections #-}
 -- {-# LANGUAGE ViewPatterns #-}
@@ -6,8 +8,9 @@ module Pia.Intro where
 
 import Control.Arrow
 import qualified Control.Category as Cat
--- import Control.Arrow ((&&&), (***), (>>>))
 import Control.Monad ((<=<))
+
+-- import Debug.Trace
 
 -- λ count "hero" "i'm a hero"
 count :: String -> String -> Int
@@ -84,6 +87,13 @@ instance Arrow SF where
   first (SF f) = SF (unzip >>> first f >>> uncurry zip)
   SF f &&& SF g = SF (f &&& g >>> uncurry zip) -- λ uncurry zip ([1,2], [3,4]) # [(1,3),(2,4)]
 
+instance ArrowChoice SF where
+  left (SF f) = SF (\xs -> combine xs (f [y | Left y <- xs]))
+    where
+      combine (Left y : xs) (z : zs) = Left z : combine xs zs
+      combine (Right y : xs) zs = Right y : combine xs zs
+      combine [] zs = []
+
 {-
 λ unzip [(1,2)]         # ([1],[2])
 λ zip [1] [2]           # [(1,2)]
@@ -98,12 +108,21 @@ testSF = runSF (arr (+ 1) >>> arr (flip (-) 1)) [1 .. 5] -- or subtract 1
 (\x -> (x :)) :: a -> [a] -> [a]
 
 λ runSF (delay 0) [1..5] # [0,1,2,3,4,5] -- added 0 in the beginning.
+λ runSF (delay' 0) [1..5] # [0,1,2,3,4] -- added 0 and keep the length of inp list
 (x:) [] => [x]
 (x:) [1, 2] => [x, 1, 2]
 It's a function which takes a list (whose items are the same type as x) and outputs the same list with x added at the start.
 -}
 delay :: b -> SF b b
 delay x = SF (x :) -- [a] -> [a]
+
+delay' :: b -> SF b b
+delay' x = SF (init . (x :))
+
+{-
+delay :: (Show b) => b -> SF b b
+delay x = SF (\xs -> traceShow xs x : xs) -- [a] -> [a]
+-}
 
 -- If we could make a pair of their outputs,
 -- then we could supply that to arr (uncurry (+)) to sum the components.
@@ -156,6 +175,10 @@ This clearly shows that `f` takes first elem of inp and `g` takes second elem of
 testAst :: Kleisli IO (Int, Int) (Int, Int)
 testAst = arr (* 2) *** arr (+ 2)
 
+-- testFirst := [(2,1),(4,2),(6,3)]
+testFirst :: [(Integer, Integer)]
+testFirst = runSF (first (arr (* 2))) [(1, 1), (2, 2), (3, 3)]
+
 {-
 Arrows and conditions:
 
@@ -175,6 +198,7 @@ listcase :: [a] -> Either () (a, [a])
 listcase [] = Left ()
 listcase (x : xs) = Right (x, xs)
 
+-- λ mapA (+1) [1..5] # [2,3,4,5,6]
 -- arr listcase := Predicate in this case, which return either `Left` or `Right`.
-mapA :: ArrowChoice arr => arr a1 a2 -> arr [a1] [a2]
+mapA :: ArrowChoice arr => arr a b -> arr [a] [b]
 mapA f = arr listcase >>> arr (const []) ||| (f *** mapA f >>> arr (uncurry (:)))
