@@ -29,9 +29,10 @@ library
   exposed-modules:
     Archive.ArrowExpr
     Archive.ConvertIOMonad
+    Archive.MonadLoopExpr
     Archive.MonadTrans
-    Archive.StateMonad
     Archive.State
+    Archive.StateMonad
     Archive.Unsafe
     LensExpr.Intro
     Lyah.Baby
@@ -85,6 +86,7 @@ library
     , flow          ^>=1.0.22
     , ghc-prim      ^>=0.6.1
     , lens          ^>=5.0.1
+    , monad-loops   ^>=0.4.3
     , monadlist     ^>=0.0.2
     , mtl           ^>=2.2.2
     , random        ^>=1.2.0

@@ -37,12 +37,9 @@ test' s args = runState (mapM addOddArg args) s
 test'' :: (Integral s) => s -> [s] -> ([Maybe s], s)
 test'' s args = runState (mapM addOddArg' args) s
 
--- λ convMaybe' [Just 1,Nothing] # [1]
+-- λ convMaybe [Just 1,Nothing] # [1]
 convMaybe :: [Maybe a] -> [a]
-convMaybe = map fromJust . filter isJust
-
-convMaybe' :: [Maybe Integer] -> [Integer]
-convMaybe' = catMaybes -- same as above.
+convMaybe = map fromJust . filter isJust -- `catMaybes`
 
 -- λ comb' 10 [1..3] # ([1,3],14)
 comb :: Integer -> [Integer] -> ([Integer], Integer)
