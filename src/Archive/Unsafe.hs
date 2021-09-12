@@ -5,8 +5,6 @@ import Data.Foldable
 import Data.STRef
 import System.IO.Unsafe
 
--- import Control.Monad.Trans.State (modify)
-
 unsafePrint :: (Show a) => a -> a
 unsafePrint xs = unsafePerformIO $ do
   print xs

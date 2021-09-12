@@ -3,6 +3,7 @@ module Archive.State where
 -- import Control.Monad.Trans.State (modify)
 
 import Control.Arrow
+import Control.Monad ((>=>))
 import Control.Monad.State
 
 {-
@@ -144,3 +145,10 @@ test12 = flip runState 11 $ withState (+ 1) (return 12) -- fmap は値に対し�
 
 test12' :: (Integer, Integer)
 test12' = flip runState 11 $ mapState (second (+ 1)) (return 12)
+
+-- test13 = ([1,2,3],3)
+test13 :: ([Integer], Integer)
+test13 = runState (mapM (return >=> \s -> modify (+ 1) >> return s) [1 .. 3]) 0
+
+-- test13' :: ([Integer], Integer)
+-- test13' = runState (mapM (get >>= \s -> modify (+ 1) >> return s) [1 .. 3]) 0

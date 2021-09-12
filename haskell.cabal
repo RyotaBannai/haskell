@@ -30,6 +30,8 @@ library
     Archive.ArrowExpr
     Archive.ConvertIOMonad
     Archive.MonadTrans
+    Archive.StateMonad
+    Archive.State
     Archive.Unsafe
     LensExpr.Intro
     Lyah.Baby
