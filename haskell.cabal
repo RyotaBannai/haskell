@@ -29,6 +29,7 @@ library
   exposed-modules:
     Archive.ArrowExpr
     Archive.ConvertIOMonad
+    Archive.MonadExpr
     Archive.MonadLoopExpr
     Archive.MonadTrans
     Archive.State
