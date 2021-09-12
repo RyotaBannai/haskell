@@ -13,6 +13,7 @@ type Longitude = Degrees
 data Meetup = Meetup {_name :: String, _location :: (Latitude, Longitude)}
 
 -- makeLenses ''Meetup
+
 re :: [Char]
 re = ("hello", ("world", "!!!")) ^. _2 . _1
 

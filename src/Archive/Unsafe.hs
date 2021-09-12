@@ -1,4 +1,4 @@
-module Pia.Unsafe where
+module Archive.Unsafe where
 
 import System.IO.Unsafe
 

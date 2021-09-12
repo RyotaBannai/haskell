@@ -11,7 +11,7 @@ import Control.Arrow
 import qualified Control.Category as Cat
 import Control.Monad ((<=<))
 import GHC.Show (appPrec)
-import Pia.Unsafe (unsafePrint)
+import Archive.Unsafe (unsafePrint)
 
 -- import Debug.Trace
 

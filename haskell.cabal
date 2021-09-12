@@ -30,6 +30,7 @@ library
     Archive.ArrowExpr
     Archive.ConvertIOMonad
     Archive.MonadTrans
+    Archive.Unsafe
     LensExpr.Intro
     Lyah.Baby
     Lyah.DataTypeAndTypeclasses
@@ -53,7 +54,6 @@ library
     Lyah.ZippersCodes
     Pia.Circuits
     Pia.Intro
-    Pia.Unsafe
     Pih.AbstractMachien
     Pih.Ballots
     Pih.CaesarCryption
