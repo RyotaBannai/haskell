@@ -119,8 +119,9 @@ deleteTodo [todoFilePath, numberString] = do
   renameFile tempName todoFilePath
 deleteTodo _ = return ()
 
--- todoFilePath :: [Char]
--- todoFilePath = "resources/todo.txt"
+todoFilePath :: String
+todoFilePath = "resources/todo.txt"
+
 deleteTodo' :: String -> IO ()
 deleteTodo' todoFilePath = do
   handle <- openFile todoFilePath ReadMode
@@ -145,11 +146,19 @@ blockBuffering = do
   withFile
     "some_bianry.txt"
     ReadMode
-    ( \handle -> do
-        hSetBuffering handle $ BlockBuffering (Just 2048) -- doen't read line by line but reads the whole file in chuncks of 2048 bytes.
-        contents <- hGetContents handle
-        putStr contents
-    )
+    $ \handle -> do
+      hSetBuffering handle $ BlockBuffering (Just 2048) -- this doesn't read line by line but reads the whole file in chuncks of 2048 bytes.
+      contents <- hGetContents handle
+      putStr contents
+
+-- this read first 5 chars
+readByThunk :: IO ()
+readByThunk = withFile todoFilePath ReadMode (hGetContents >=> (putStrLn . take 5))
+
+-- readByThunk' :: IO ()
+-- readByThunk' = withFile "myfile" ReadMode $ \handle ->
+--   fmap (take 5) (hGetContents handle)
+--     >>= putStrLn
 
 readfwf :: IO ()
 readfwf = do

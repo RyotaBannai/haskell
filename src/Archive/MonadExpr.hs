@@ -35,11 +35,13 @@ test3 :: Maybe [Int]
 test3 = filterM (Just . (== 100)) numbers
 
 {-
+* `mfilter` is a simple helper with someting like `case predicate x of Just True -> x; Just False -> Nothing`
+-}
+
+{-
 λ mfilter odd (Just 1) # Just 1
 λ mfilter odd (Just 2) # Nothing
 -}
-
--- * `mfilter` is a simple helper with someting like `case predicate x of Just True -> x; Just Falses -> Nothing`
 
 -- test4 = [Just 1,Just 3]
 test4 :: [Maybe Integer]
