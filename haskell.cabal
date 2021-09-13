@@ -32,6 +32,7 @@ library
     Archive.MonadExpr
     Archive.MonadLoopExpr
     Archive.MonadTrans
+    Archive.PipeExpr
     Archive.State
     Archive.StateMonad
     Archive.Unsafe
@@ -90,6 +91,7 @@ library
     , monad-loops   ^>=0.4.3
     , monadlist     ^>=0.0.2
     , mtl           ^>=2.2.2
+    , pipes         ^>=4.3.16
     , random        ^>=1.2.0
     , text          ^>=1.2.4.1
     , transformers  ^>=0.5.6.2
