@@ -2,14 +2,21 @@ module Archive.PipeExpr where
 
 {-
 What is pipes/conduit trying to solve | <https://stackoverflow.com/questions/22742001/what-is-pipes-conduit-trying-to-solve>
-conduit | <https://github.com/snoyberg/conduit
+conduit | <https://github.com/snoyberg/conduit>
+Pipes tutorial | <https://hackage.haskell.org/package/pipes-4.1.0/docs/Pipes-Tutorial.html>
 -}
+
+-- Pipes.Prelude already has 'stdinLn' and 'stdoutLn'
+
+import Control.Applicative ((<$)) -- (<$) modifies return values
 import Control.Exception
 import Control.Monad
+import Data.Functor (($>))
 import qualified GHC.IO.Exception as G
 import Pipes
-import qualified Pipes.Prelude as P -- Pipes.Prelude already has 'stdinLn'
+import qualified Pipes.Prelude as P
 import System.IO
+import Prelude hiding (take)
 
 {-
 As you connect components their types will change to reflect inputs and outputs that you've fused away.
@@ -37,7 +44,11 @@ loop = for stdinLn $ \str -> do
 This is the real type signature of `runEffect`, which refuses to accept anything other than an `Effect`.
 This ensures that we handle all inputs and outputs before streaming data.
 
-for :: Monad m => Producer a m r -> (a -> Producer b m ()) -> Producer b m r
+ for :: Monad m => Producer a m r -> (a -> Producer b    m ()) -> Producer b    m r
+ -- Specialize 'b' to 'X'
+ for :: Monad m => Producer a m r -> (a -> Producer X m ()) -> Producer X m r
+ -- Producer X = Effect
+ for :: Monad m => Producer a m r -> (a -> Effect        m ()) -> Effect        m r
 
 each :: Monad m => [a] -> Producer a m ()
 each as = mapM_ yield as
@@ -73,6 +84,7 @@ for (for s f) g = for s (\x -> for (f x) g)
 -- f :: Monad m => a -> Producer b m ()  -- i.e. 'duplicate'
 -- g :: Monad m => b -> Producer c m ()  -- i.e. '(lift . putStrLn)'
 
+* `~>` into operator for `Producer` to yield a value
 (f ~> g) x = for (f x) g
 
 * Left Identity
@@ -95,6 +107,16 @@ for s yield = s
 test4 :: IO ()
 test4 = runEffect $ for P.stdinLn (duplicate ~> lift . putStrLn)
 
+test4' :: IO ()
+test4' = runEffect $
+  for P.stdinLn $ \str1 ->
+    for (duplicate str1) $ \str2 ->
+      lift $ putStrLn str2
+
+-- Not working because `~>` can only simplify `\str -> Proxy` lambda
+-- test4'' :: IO ()
+-- test4'' = runEffect $ P.stdinLn ~> (duplicate ~> lift . putStrLn)
+
 {-
 next :: Monad m => Producer a m r -> m (Either r (a, Producer a m r))
 
@@ -115,7 +137,7 @@ If nobody provides a value (which is possible) then `await` never returns. You c
 
 await :: Monad m => Consumer a m a
 
-`>~` feed operator to feed value to `Consumer`
+* `>~` feed operator to feed value to `Consumer`
 
 Feed action -> Consumer to feed -> Returns new Effect respectively.
 (>~) :: Monad m => Effect m b -> Consumer b m c -> Effect m c
@@ -154,3 +176,85 @@ doubleUp = do
 
 test6 :: IO String
 test6 = runEffect $ lift getLine >~ doubleUp >~ doubleUp
+
+{-
+* (>->) pipe operator
+(>->) :: Monad m => Producer a m r -> Consumer a m r -> Effect m r
+
+(>->) is "pull-based" meaning that control flow begins at `the most downstream component` (i.e. stdoutLn in the above example).
+Any time a component `awaits` a value it `blocks` and transfers control upstream and every time a component `yields` a value it blocks and restores control back downstream, satisfying the await.
+So in the below example, (>->) matches every `await` from `stdoutLn` with a `yield` from `stdinLn`.
+
+`Streaming` stops when either `stdinLn` terminates (i.e. end of input) or `stdoutLn` terminates (i.e. broken pipe).
+This is why (>->) requires that both the `Producer` and `Consumer` share `the same type of return value`:
+whichever one terminates first provides the return value for `the entire Effect`.
+
+The "pipeline" not only echoes `standard input` to `standard output`,
+but also handles both `end of input` and `broken pipe errors`
+
+You can use `Pipes` to transform `Producers`, `Consumers`, or even other `Pipes` using the same (>->) operator:
+
+(>->) :: Monad m => Producer a m r -> Pipe   a b m r -> Producer b m r
+(>->) :: Monad m => Pipe   a b m r -> Consumer b m r -> Consumer a m r
+(>->) :: Monad m => Pipe   a b m r -> Pipe   b c m r -> Pipe   a c m r
+
+-}
+
+test7 :: IO ()
+test7 = runEffect $ P.stdinLn >-> P.stdoutLn
+
+{-
+| <https://hackage.haskell.org/package/base-4.15.0.0/docs/Data-Functor.html#v:-60--36->
+
+($>) := 左側が成功系であれば、右側の値と中身を入れかえる
+成功系: Just, Right
+λ Just "aaa" $> "Ok"     # Just "Ok"
+λ Nothing $> "OK"        # Nothing
+λ Right "aaa" $> "OK"    # Right "OK"
+λ Left "aaa" $> "OK"     # Left "aaa"
+
+(<$) := Flipped version of ($>).
+右側が成功系であれば、左側の値で中身を入れ替える.
+λ "Ok" <$ Just "aaa"      # Just "Ok"
+λ "Ok" <$ Nothing         # Nothing
+λ "OK" <$ Right "aaa"     # Right "OK"
+λ "OK" <$ Left "aaa"      # Left "aaa"
+-}
+
+{-
+perl options <https://www.tohoho-web.com/perl/app2.htm>
+`-e` run perl script
+
+$ ./haskell                         -- test\ntest\n<Ctr+D>End of input!\n
+$ ./haskell | perl -e 'close STDIN' -- aaa\nBroken pipe!\n
+$ ./haskell | perl -e "print 5 * 3" -- 15\n15\n
+-}
+
+test8 :: IO ()
+test8 = do
+  hSetBuffering stdout NoBuffering
+  str <- runEffect $ ("End of input!" <$ P.stdinLn) >-> ("Broken pipe!" <$ P.stdoutLn)
+  hPutStrLn stderr str
+
+-- Pipe `await's a's` `yield's a's` IO ()
+take :: Int -> Pipe a a IO ()
+take n = do
+  replicateM_ n $ do
+    x <- await -- `await` a value of type `a` -- Pipe の中でどちらも使う時は、Producer-Consumer 間の yield-await の順が逆になる（またはどちらかが先に来ても問題ないのか.）
+    yield x -- `yield` a value of type `a`
+  lift $ putStrLn "You shall not pass!"
+
+maxInput :: Int -> Producer String IO ()
+maxInput n = P.stdinLn >-> take n
+
+test9 :: IO ()
+test9 = runEffect $ maxInput 3 >-> P.stdoutLn
+
+maxOutput :: Int -> Consumer String IO ()
+maxOutput n = take n >-> P.stdoutLn
+
+test10 :: IO ()
+test10 = runEffect $ P.stdinLn >-> maxOutput 3
+
+test11 :: IO ()
+test11 = runEffect $ P.stdinLn >-> take 3 >-> P.stdoutLn

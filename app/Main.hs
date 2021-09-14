@@ -1,5 +1,6 @@
 module Main where
 
+import qualified Archive.PipeExpr as PE
 import Control.Exception
 import Control.Monad
 import Data.Char
@@ -13,11 +14,17 @@ import System.IO.Error
 import System.Random
 
 -- main always has a type signate of main :: IO something
+{-
+Excutable path: dist-newstyle/build/x86_64-osx/ghc-8.10.5/haskell-0.1.0.0/x/haskell/build/haskell
+-}
 main :: IO ()
-main = Lyah.FunctorCodes.moreComplex
+main = PE.test8
 
 main' :: IO ()
-main' = toTry `catch` betterHandler
+main' = Lyah.FunctorCodes.moreComplex
+
+main'' :: IO ()
+main'' = toTry `catch` betterHandler
 
 toTry :: IO ()
 toTry = do
