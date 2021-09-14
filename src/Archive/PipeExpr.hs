@@ -4,8 +4,9 @@ module Archive.PipeExpr where
 What is pipes/conduit trying to solve | <https://stackoverflow.com/questions/22742001/what-is-pipes-conduit-trying-to-solve>
 conduit | <https://github.com/snoyberg/conduit
 -}
-
+import Control.Exception
 import Control.Monad
+import qualified GHC.IO.Exception as G
 import Pipes
 import qualified Pipes.Prelude as P -- Pipes.Prelude already has 'stdinLn'
 import System.IO
@@ -93,3 +94,63 @@ for s yield = s
 -- Condensed version of test3
 test4 :: IO ()
 test4 = runEffect $ for P.stdinLn (duplicate ~> lift . putStrLn)
+
+{-
+next :: Monad m => Producer a m r -> m (Either r (a, Producer a m r))
+
+Think of next as pattern matching on the head of the Producer.
+This `Either` returns a Left if the Producer is done or
+it returns a `Right` containing the next value, a, along with the remainder of the Producer.
+
+ttry :: forall e a. Exception e => IO a -> IO (Either e a)
+
+Similar to `catch` , but returns an `Either` result which is (`Right a`) if `no exception of type e was raised`, or
+(`Left ex`) if an exception of type e was raised and its value is ex.
+If any other type of exception is raised than it will be propogated up to the next enclosing exception handler.
+
+try a = catch (Right `liftM` a) (return . Left)
+
+`await` is the dual of yield: we suspend our `Consumer` until we receive a new value.
+If nobody provides a value (which is possible) then `await` never returns. You can think of `await` as having the following type:
+
+await :: Monad m => Consumer a m a
+
+`>~` feed operator to feed value to `Consumer`
+
+Feed action -> Consumer to feed -> Returns new Effect respectively.
+(>~) :: Monad m => Effect m b -> Consumer b m c -> Effect m c
+also permits the follwoing type:
+(>~) :: Monad m => Consumer a m b -> Consumer b m c -> Consumer a m c
+
+Also, (>~) has an identity, which is `await`
+* Left identity
+await >~ f = f
+* Right Identity
+f >~ await = f
+
+-}
+
+stdoutLn :: Consumer String IO ()
+stdoutLn = do
+  str <- await
+  x <- lift $ try $ putStrLn str
+  case x of
+    Left e@G.IOError {G.ioe_type = t} ->
+      lift $ unless (t == G.ResourceVanished) $ throwIO e -- terminates gracefully when receiving a broken pipe error
+    Right () -> stdoutLn
+
+{-
+(draw ~> consumer) loops over (consumer (stdoutLn)),
+substituting each `await` in (consumer) with (draw (lift getLine := Effect m b))
+-}
+test5 :: IO ()
+test5 = runEffect $ lift getLine >~ stdoutLn
+
+doubleUp :: Monad m => Consumer String m String
+doubleUp = do
+  str1 <- await
+  str2 <- await
+  return (str1 ++ str2)
+
+test6 :: IO String
+test6 = runEffect $ lift getLine >~ doubleUp >~ doubleUp
