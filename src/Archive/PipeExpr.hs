@@ -4,6 +4,8 @@ module Archive.PipeExpr where
 What is pipes/conduit trying to solve | <https://stackoverflow.com/questions/22742001/what-is-pipes-conduit-trying-to-solve>
 conduit | <https://github.com/snoyberg/conduit>
 Pipes tutorial | <https://hackage.haskell.org/package/pipes-4.1.0/docs/Pipes-Tutorial.html>
+Pipes docs | <https://hackage.haskell.org/package/pipes-4.3.16/docs/Pipes-Prelude.html>
+Pipes core | <https://hackage.haskell.org/package/pipes-4.1.0/docs/Pipes-Core.html>
 -}
 
 -- Pipes.Prelude already has 'stdinLn' and 'stdoutLn'
@@ -11,12 +13,17 @@ Pipes tutorial | <https://hackage.haskell.org/package/pipes-4.1.0/docs/Pipes-Tut
 import Control.Applicative ((<$)) -- (<$) modifies return values
 import Control.Exception
 import Control.Monad
+import Control.Monad.Codensity (lowerCodensity)
+import Control.Monad.Trans.Maybe
+import Data.Char
 import Data.Functor (($>))
 import qualified GHC.IO.Exception as G
 import Pipes
+import qualified Pipes as P
+import Pipes.Lift
 import qualified Pipes.Prelude as P
 import System.IO
-import Prelude hiding (take)
+import Prelude hiding (head, take)
 
 {-
 As you connect components their types will change to reflect inputs and outputs that you've fused away.
@@ -172,8 +179,9 @@ doubleUp :: Monad m => Consumer String m String
 doubleUp = do
   str1 <- await
   str2 <- await
-  return (str1 ++ str2)
+  return (str1 ++ str2 ++ "\n")
 
+-- test6 = "aaabbb\ncccddd\n\n"
 test6 :: IO String
 test6 = runEffect $ lift getLine >~ doubleUp >~ doubleUp
 
@@ -258,3 +266,140 @@ test10 = runEffect $ P.stdinLn >-> maxOutput 3
 
 test11 :: IO ()
 test11 = runEffect $ P.stdinLn >-> take 3 >-> P.stdoutLn
+
+{-
+cat :: Monad m => Pipe a a m r
+cat = forever $ do
+  x <- await
+  yield x
+
+cat and (>->) obey the Category laws:
+
+-- Useless use of cat
+cat >-> f = f
+-- Redirecting output to cat does nothing
+f >-> cat = f
+-- The pipe operator is associative
+(f >-> g) >-> h = f >-> (g >-> h)
+
+-}
+
+head :: Monad m => Int -> Pipe a a m ()
+head = P.take
+
+yes :: Monad m => Producer String m r
+yes = forever $ yield "y"
+
+yes' :: Monad m => Producer String m r
+yes' = return "y" >~ cat
+
+-- This prints out 3 'y's, just like the equivalent Unix pipeline: `yes | head -3`
+test12 :: IO ()
+test12 = runEffect $ yes' >-> head 3 >-> P.stdoutLn
+
+test12' :: IO ()
+test12' = runEffect $ yes' >-> head 3 >-> P.mapM_ (print . (== "y"))
+
+{-
+ListT differs from the implementation in transformers because this ListT:
+- obeys the monad laws, and
+- `streams data` immediately instead of collecting all results into memory.
+
+every :: Monad m => ListT m a -> Producer a m ()
+Select :: Producer a m () -> ListT m a
+-}
+
+pair :: ListT IO (Int, Int)
+pair = do
+  x <- Select $ each [1, 2]
+  lift $ putStrLn $ "x = " ++ show x
+  y <- Select $ each [3, 4]
+  lift $ putStrLn $ "y = " ++ show y
+  return (x, y)
+
+test13 :: IO ()
+test13 = runEffect $ for (every pair) (lift . print)
+
+-- `>->` を使いたい時は、lambda のように引数を直接取る関数ではなく、Consumer のように await で value を受け取るものを使う必要がある.
+test13' :: IO ()
+test13' = runEffect $ every pair >-> P.print
+
+input :: Producer String IO ()
+input = P.stdinLn >-> P.takeWhile (/= "quit")
+
+name :: ListT IO String
+name = do
+  firstName <- Select input
+  lastName <- Select input
+  return (firstName ++ " " ++ lastName)
+
+test14 :: IO ()
+test14 = runEffect $ every name >-> P.stdoutLn
+
+test14' :: IO ()
+test14' = runEffect $ P.stdinLn >-> P.takeWhile (/= "quit") >-> P.stdoutLn
+
+{-
+mapM (f >=> g) = mapM f >-> mapM g
+-}
+test15 :: IO ()
+test15 = runEffect $ P.stdinLn >-> P.filter (/= "quit") >-> P.map (/= "quit") >-> P.print
+
+-- You can even compose pipies inside of another pipe:
+customerService :: Producer String IO ()
+customerService = do
+  each ["Hello, how can I help you?", "Hold for one second."]
+  P.stdinLn >-> P.takeWhile (/= "Goodbye!")
+
+goodbye :: Consumer String IO ()
+goodbye = P.filter (/= "Goodbye!") >-> P.stdoutLn
+
+test16 :: IO ()
+test16 = runEffect $ customerService >-> goodbye
+
+{-
+Also check out `test2'`
+`each ~>` to traverse nested data structures.
+-}
+-- test17 = 1\n2\n3\n
+test17 :: IO ()
+test17 = runEffect $ (each ~> each ~> each ~> lift . print) [[Just 1, Nothing], [Just 2, Just 3]]
+
+{-
+* every
+every :: (Monad m, Enumerable t) => t m a -> Producer a m ()
+
+* toListT
+if you have an effectful container of your own that you want others to traverse using pipes, just have your container implement the toListT method of the Enumerable class:
+
+class Enumerable t where
+    toListT :: Monad m => t m a -> ListT m a
+-}
+input' :: MaybeT IO String
+input' = do
+  str <- lift getLine
+  guard (str /= "Fail")
+  return str
+
+test18 :: IO ()
+test18 = runEffect $ every input' >-> P.stdoutLn
+
+test18' :: IO ()
+test18' = runEffect $ for (every input') (lift . print)
+
+{-
+- sequence
+- replicateM
+- mapM
+
+For example, the time complexity of this code segment scales quadratically with n:
+
+quadratic :: Int -> Consumer a m [a]
+quadratic n = replicateM n await
+
+These three functions are generally bad practice to use, because all three of them correspond to "ListT done wrong", building a list in memory instead of streaming results.
+
+linear :: Monad m => Int -> Consumer a m [a]
+linear n = lowerCodensity $ replicateM n $ lift await
+
+-}
