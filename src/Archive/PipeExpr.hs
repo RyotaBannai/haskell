@@ -6,6 +6,7 @@ conduit | <https://github.com/snoyberg/conduit>
 Pipes tutorial | <https://hackage.haskell.org/package/pipes-4.1.0/docs/Pipes-Tutorial.html>
 Pipes docs | <https://hackage.haskell.org/package/pipes-4.3.16/docs/Pipes-Prelude.html>
 Pipes core | <https://hackage.haskell.org/package/pipes-4.1.0/docs/Pipes-Core.html>
+Streaming | <https://hackage.haskell.org/package/streaming-0.2.3.0/docs/Streaming-Prelude.html#v:dropWhile>
 -}
 
 -- Pipes.Prelude already has 'stdinLn' and 'stdoutLn'

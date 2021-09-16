@@ -40,6 +40,7 @@ library
     Archive.State
     Archive.StateMonad
     Archive.Unsafe
+    Archive.ViewPattern
     LensExpr.Intro
     Lyah.Baby
     Lyah.DataTypeAndTypeclasses
