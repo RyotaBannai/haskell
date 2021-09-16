@@ -1,10 +1,15 @@
-module Archive.CPS where
+module Archive.ContExpr where
+
+import Control.Monad
 
 {-
 CPS(Continuation Passing Style)
 
 Continuation Monad :=「関数待受状態」のコンテナ
+| <https://enakai00.hatenablog.com/entry/20121010/1349835303>
+| <https://enakai00.hatenablog.com/entry/20121013/1350131987>
 -}
+
 infixr 5 =:
 
 (=:) :: a -> (a -> b) -> b
@@ -58,7 +63,7 @@ s3 = Cont (square 3)
 test5 :: Int
 test5 = (* 10) =: runCont s3
 
--- https://stackoverflow.com/questions/59122852/how-to-write-functor-instance-of-continuation-monad
+-- <https://stackoverflow.com/questions/59122852/how-to-write-functor-instance-of-continuation-monad>
 instance Functor (Cont r) where
   fmap f (Cont k2) = Cont (\k1 -> k2 (k1 . f))
 
@@ -120,3 +125,30 @@ test7 = print =: runCont (pytagoras2 2 3)
 -- test7 = 16
 test7' :: Integer
 test7' = (+ 3) =: runCont (pytagoras2 2 3)
+
+pythagoras3 :: Int -> Int -> Cont r Int
+pythagoras3 n m = do
+  if n < 0 || m < 0
+    then return (-1)
+    else do
+      x <- squareCont n
+      y <- squareCont m
+      addCont x y
+
+-- callCC = Cont $ \k -> k =: c := 「関数 k を受取り、k で c を評価した結果を返す」という意味で Continuation Monad
+callCC :: ((a -> Cont r b) -> Cont r a) -> Cont r a
+callCC f = Cont $ \k -> runCont (f (\a -> Cont $ \_ -> k a)) k
+
+callCC' :: ((a -> Cont r b) -> Cont r a) -> Cont r a
+callCC' f = Cont $ \k -> k =: runCont (stopper k =: f)
+  where
+    stopper :: (a -> r) -> (a -> Cont r b)
+    stopper k = \a -> Cont (\_ -> k a)
+
+-- `brk` := `stopper print`
+pythagoras3' :: Int -> Int -> Cont r Int
+pythagoras3' n m = callCC $ \brk -> do
+  when (n < 0 || m < 0) $ brk (- 1)
+  x <- squareCont n
+  y <- squareCont m
+  addCont x y

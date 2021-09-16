@@ -28,8 +28,9 @@ library
   -- cabal-fmt: expand src
   exposed-modules:
     Archive.ArrowExpr
+    Archive.ContExpr
+    Archive.ContTExpr
     Archive.ConvertIOMonad
-    Archive.CPS
     Archive.EitherExpr
     Archive.MonadExpr
     Archive.MonadLoopExpr
