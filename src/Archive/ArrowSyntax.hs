@@ -44,7 +44,7 @@ maybeAddEven'' ma mb
 
 data User = User {userNickname :: T.Text, userName :: T.Text} deriving (Show)
 
--- ViewPatterns
+-- View patterns
 mkUser :: T.Text -> T.Text -> User
 mkUser (T.toLower -> nickname) (T.toLower -> name) =
   User
@@ -56,6 +56,10 @@ pairFromListWith :: (a1 -> a2) -> [a1] -> Maybe (a2, a2)
 pairFromListWith f xs = case map f xs of
   [first, second] -> Just (first, second) -- [x,y] or x:y:[]
   _ -> Nothing
+
+-- ?
+-- pairFromListWith' f (x : map f -> xs) = Just (f x, head xs)
+-- pairFromListWith' _ _ = Nothing
 
 wrapMkUser :: [String] -> Maybe User
 wrapMkUser = pairFromListWith T.pack >=> Just . uncurry mkUser -- `Maybe (Text, Text)` on the first part

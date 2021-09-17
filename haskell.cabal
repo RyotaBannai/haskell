@@ -41,6 +41,7 @@ library
     Archive.State
     Archive.StateMonad
     Archive.Unsafe
+    Archive.ViewPatterns
     LensExpr.Intro
     Lyah.Baby
     Lyah.DataTypeAndTypeclasses
@@ -89,7 +90,9 @@ library
     , adjunctions     ^>=4.4
     , base            ^>=4.14.2.0
     , bytestring      ^>=0.10.12.0
+    , comonad         ^>=5.0.8
     , containers      ^>=0.6.4.1
+    , extra           ^>=1.7.9
     , flow            ^>=1.0.22
     , ghc-prim        ^>=0.6.1
     , kan-extensions  ^>=5.2.3
@@ -101,7 +104,6 @@ library
     , random          ^>=1.2.0
     , text            ^>=1.2.4.1
     , transformers    ^>=0.5.6.2
-    , extra            ^>=1.7.9
 
   hs-source-dirs:   src
   default-language: Haskell2010
