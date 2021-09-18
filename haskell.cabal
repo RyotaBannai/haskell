@@ -34,6 +34,7 @@ library
     Archive.ContTExpr
     Archive.ConvertIOMonad
     Archive.EitherExpr
+    Archive.Misc
     Archive.MonadExpr
     Archive.MonadLoopExpr
     Archive.MonadTrans
@@ -89,11 +90,13 @@ library
   -- other-extensions:
   build-depends:
     , adjunctions     ^>=4.4
+    , array           ^>=0.5.4.0
     , attoparsec      ^>=0.14.1
     , base            ^>=4.14.2.0
     , bytestring      ^>=0.10.12.0
     , comonad         ^>=5.0.8
     , containers      ^>=0.6.4.1
+    , criterion       ^>=1.5.5.0
     , extra           ^>=1.7.9
     , flow            ^>=1.0.22
     , ghc-prim        ^>=0.6.1

@@ -313,6 +313,7 @@ Therefore,
 proc (f,x) -> f -< x
 which is rejected, because it translates to arr `(\(f,x)->x) >>> f`, in which `f` is used outside its scope.
 
+* (-<<) 
 関数 f を引数 x に適応したい場合は、`app` を使う:
 proc (f,x) -> app -< (f,x)
 または、
@@ -337,7 +338,7 @@ proc pat -> do x <- c1
 exampleCommandCombinator :: SF Int (Int, Int)
 exampleCommandCombinator = proc x -> 
   do returnA -< x 
-  &&& do delay 0 -< x -- `&&&`is on different block, which makes says do block after `&&&` is not a part of the preeding command.
+  &&& do delay 0 -< x -- `&&&`is on different block, which makes says do block after `&&&` is not a part of the preceeding command.
 
 -- Pattern if `a command combinator` is not `an infix operator` called `banana brackets`
 exampleCommandCombinator' :: SF Int (Int, Int)
@@ -348,8 +349,7 @@ exampleCommandCombinator'' = returnA &&& delay 0
 
 
 mapC :: ArrowChoice arr => arr (env,a) b -> arr (env,[a]) [b]
-mapC c = proc (env,xs) ->
-  case xs of
+mapC c = proc (env,xs) -> case xs of
     [] -> returnA -< []
     x:xs' -> do y <- c -< (env,x)
                 ys <- mapC c -< (env,xs')
