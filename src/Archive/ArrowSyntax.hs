@@ -18,6 +18,7 @@ Arrow Syntac | <https://kowainik.github.io/posts/arrows-zoo>
 GHC | <https://downloads.haskell.org/ghc/latest/docs/html/users_guide/exts/monad_comprehensions.html>
 Data.List.Extra | <https://hackage.haskell.org/package/extra-1.7.10/docs/Data-List-Extra.html>
 SOF | <https://stackoverflow.com/questions/6270324/in-haskell-how-do-you-trim-whitespace-from-the-beginning-and-end-of-a-string>
+Type Synonym | <https://gitlab.haskell.org/ghc/ghc/-/wikis/pattern-synonyms>
 -}
 
 -- λ maybeAddEven (Just 2) (Just 2) # Just 4

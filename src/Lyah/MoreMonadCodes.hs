@@ -1,15 +1,12 @@
 module Lyah.MoreMonadCodes where
 
-import Control.Applicative
 import Control.Monad
 import Control.Monad.Except
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.State
 import Control.Monad.Writer
 import Data.List (foldr)
-import Data.Monoid
 import Data.Ratio
-import Data.Semigroup
 import GHC.Base
 import Lyah.KnightsQueat (KnightPos, moveKnight)
 import Lyah.MonadCodes (Birds, Pole (..), landLeft, landRight)

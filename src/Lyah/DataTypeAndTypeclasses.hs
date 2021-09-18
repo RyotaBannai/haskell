@@ -35,7 +35,6 @@ where
 import qualified Data.Map
 import qualified Data.Map as Map
 import Data.Sequence (Seq (Empty))
-import GHC.Base (join)
 
 -- export all Type contructors wiht `..`
 -- We could also opt not to export any value constructors for Shape by just writing Shape in the export statement.
